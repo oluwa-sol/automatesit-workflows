@@ -1,0 +1,329 @@
+{
+  "name": "Real Estate - Daily Agent Briefing",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appJfSt8YbO1NAWjA",
+          "mode": "list",
+          "cachedResultName": " Real Estate CRM",
+          "cachedResultUrl": "https://airtable.com/appJfSt8YbO1NAWjA"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblOm3pbIKIYXl7p4",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://airtable.com/appJfSt8YbO1NAWjA/tblOm3pbIKIYXl7p4"
+        },
+        "filterByFormula": "AND(NOT({Status} = \"Cold\"), NOT({Status} = \"Closed\"))",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -384,
+        -144
+      ],
+      "id": "e6fe8d7f-064b-43a7-9c8e-b5d183ef3533",
+      "name": "Active Leads",
+      "alwaysOutputData": true,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "JUP90O0LDz0CZmfX",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appJfSt8YbO1NAWjA",
+          "mode": "list",
+          "cachedResultName": " Real Estate CRM",
+          "cachedResultUrl": "https://airtable.com/appJfSt8YbO1NAWjA"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblOm3pbIKIYXl7p4",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://airtable.com/appJfSt8YbO1NAWjA/tblOm3pbIKIYXl7p4"
+        },
+        "filterByFormula": "IS_SAME({Viewing Date}, TODAY(), 'day')",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -384,
+        0
+      ],
+      "id": "90f46657-72e1-4ced-9f7d-bf9c2522cd49",
+      "name": "Todays Viewings",
+      "alwaysOutputData": true,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "JUP90O0LDz0CZmfX",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appJfSt8YbO1NAWjA",
+          "mode": "list",
+          "cachedResultName": " Real Estate CRM",
+          "cachedResultUrl": "https://airtable.com/appJfSt8YbO1NAWjA"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblOm3pbIKIYXl7p4",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://airtable.com/appJfSt8YbO1NAWjA/tblOm3pbIKIYXl7p4"
+        },
+        "filterByFormula": "AND(NOT({Status} = \"Cold\"), NOT({Status} = \"Closed\"), DATETIME_DIFF(TODAY(), {Last Contact}, 'hours') >= 48)",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -384,
+        176
+      ],
+      "id": "5d83c858-37ad-49bf-9243-cbeae94f0f7b",
+      "name": "Search records",
+      "alwaysOutputData": true,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "JUP90O0LDz0CZmfX",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const getNodeData = (nodeName) => {\n  try {\n    return $(nodeName).all().map(i => i.json);\n  } catch(e) {\n    return [];\n  }\n};\n\nconst activeLeads = getNodeData('Active Leads');\nconst todayViewings = getNodeData('Todays Viewings');\nconst inactiveLeads = getNodeData('Search records');\n\nconst result = {\n  total_active: activeLeads.length,\n  viewings_today: todayViewings.length,\n  needs_attention: inactiveLeads.length,\n  viewing_names: todayViewings.map(l => l.fields ? l.fields['Lead Name'] : l['Lead Name']).filter(Boolean).join(', ') || 'None today',\n  inactive_names: inactiveLeads.map(l => l.fields ? l.fields['Lead Name'] : l['Lead Name']).filter(Boolean).join(', ') || 'None'\n};\n\nreturn [{ json: result }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        32,
+        0
+      ],
+      "id": "14f1bfac-5428-4420-910e-5116430e0a5a",
+      "name": "Calculate Summary",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "sendTo": "kelvinjr995@gmail.com",
+        "subject": "={{ '🏠 Good morning - Your property pipeline for ' + new Date().toLocaleDateString() }}",
+        "emailType": "text",
+        "message": "=Good morning.\n\nHere is your pipeline summary for today.\n\nVIEWINGS TODAY ({{ $json.viewings_today }}):\n{{ $json.viewing_names }}\n\nACTIVE LEADS ({{ $json.total_active }}):\nAll leads currently in progress.\n\nNEEDS YOUR ATTENTION ({{ $json.needs_attention }}):\n{{ $json.inactive_names }}\nThese leads have had no activity in the last 48 hours.\n\nHave a productive day.",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        240,
+        0
+      ],
+      "id": "e94796ed-3208-4e96-963c-d215c24c59fd",
+      "name": "Daily Brief",
+      "webhookId": "8576cee2-51e2-4bb4-b815-156e2207d236",
+      "executeOnce": true,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "cf51GucqhKZN6PU9",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -192,
+        -16
+      ],
+      "id": "579d9646-08e3-47d9-8a9e-17ce4f8502b1",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "content": "## SCHEDULED TRIGGER\n### Fires every day at 7am automatically.\n### No manual intervention required.",
+        "height": 336,
+        "width": 224,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -800,
+        -192
+      ],
+      "typeVersion": 1,
+      "id": "7face577-0d77-4083-9208-a3683ba1ace6",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 7
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -752,
+        0
+      ],
+      "id": "b6c1c34e-5a28-48d9-a887-9a40c2afe80c",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "content": "## DATA COLLECTION\n### Active leads, today's viewings and inactive leads all pulled from Airtable and merged into one stream.",
+        "height": 576,
+        "width": 464,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -544,
+        -240
+      ],
+      "typeVersion": 1,
+      "id": "096626db-042d-4462-94da-ef56a7690aa6",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## DAILY SUMMARY\n### Metrics calculated and clean morning briefing delivered to agent inbox.",
+        "height": 336,
+        "width": 464,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -32,
+        -192
+      ],
+      "typeVersion": 1,
+      "id": "dff352b0-8404-4c96-8979-c2907f29a00c",
+      "name": "Sticky Note2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Active Leads": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Todays Viewings": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Search records": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Calculate Summary": {
+      "main": [
+        [
+          {
+            "node": "Daily Brief",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Calculate Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Search records",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Todays Viewings",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Active Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "PqSKnPf8G4pSaNvC",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "670e7b02-32ea-4582-a61d-44a057bb04c2",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d730a0d19a20fc82f7b41660644c3a9f8305089ec2417b6f77f152d420f2429f"
+  },
+  "id": "qA8tiYbQxjtdQQvC",
+  "tags": []
+}

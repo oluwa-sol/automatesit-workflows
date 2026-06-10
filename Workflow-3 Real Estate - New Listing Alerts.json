@@ -1,0 +1,312 @@
+{
+  "name": "Real Estate - New Listing Alerts",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "authentication": "airtableTokenApi",
+        "baseId": {
+          "__rl": true,
+          "value": "appJfSt8YbO1NAWjA",
+          "mode": "id"
+        },
+        "tableId": {
+          "__rl": true,
+          "value": "tblJYMbxjJ1FLn8kO",
+          "mode": "id"
+        },
+        "triggerField": "Date Added",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.airtableTrigger",
+      "typeVersion": 1,
+      "position": [
+        -496,
+        -272
+      ],
+      "id": "2303630e-3a76-4cfd-a848-59ba9f703b08",
+      "name": "Airtable Trigger",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "JUP90O0LDz0CZmfX",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a3f5d075-2557-4db3-a6ef-20c0aa220d5f",
+              "name": "Property Name",
+              "value": "={{ $json.body.Property_Name }}",
+              "type": "string"
+            },
+            {
+              "id": "d7ddf181-a5cc-4f58-8090-e33bfd9cb49a",
+              "name": "Type",
+              "value": "={{ $json.body.Type }}",
+              "type": "string"
+            },
+            {
+              "id": "074c4b02-05f2-49a2-b4ba-7eaa1c0ef941",
+              "name": "Area",
+              "value": "={{ $json.body.Area }}",
+              "type": "string"
+            },
+            {
+              "id": "bb991202-f0a9-42b3-b32e-7a052996a126",
+              "name": "Price",
+              "value": "={{ $json.body.Price }}",
+              "type": "number"
+            },
+            {
+              "id": "d799091c-0e23-4a78-a3ae-85eac9d4e620",
+              "name": "Bedrooms",
+              "value": "={{ $json.body.Bedrooms }}",
+              "type": "number"
+            },
+            {
+              "id": "4218d44e-0612-4974-baa4-a3d19404e684",
+              "name": "Description",
+              "value": "={{ $json.body.Description }}",
+              "type": "string"
+            },
+            {
+              "id": "22bee139-b82c-4dee-9216-38355b857062",
+              "name": "Status",
+              "value": "={{ $json.body.Status }}",
+              "type": "string"
+            },
+            {
+              "id": "e6b58463-d907-4254-b25e-dab6d11db092",
+              "name": "Date Added",
+              "value": "={{ $json.body.Date_Added }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -288,
+        128
+      ],
+      "id": "712fbef7-f8f4-4b71-86c4-b2780b89f8ce",
+      "name": "Map Property Data"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appJfSt8YbO1NAWjA",
+          "mode": "list",
+          "cachedResultName": " Real Estate CRM",
+          "cachedResultUrl": "https://airtable.com/appJfSt8YbO1NAWjA"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblOm3pbIKIYXl7p4",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://airtable.com/appJfSt8YbO1NAWjA/tblOm3pbIKIYXl7p4"
+        },
+        "filterByFormula": "=AND(NOT({Status} = \"Cold\"), NOT({Status} = \"Closed\"), FIND(LOWER(\"{{ $('Map Property Data').item.json.Area }}\"), LOWER({Property Interest})))",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -32,
+        128
+      ],
+      "id": "e3683d2d-c7c8-4dba-b24b-de9ef47e6e8f",
+      "name": "Search Matching Leads",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "JUP90O0LDz0CZmfX",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const leads = $input.all().map(item => item.json);\nconst property = $('Map Property Data').item.json;\n\nreturn leads.map(lead => ({\n  json: {\n    Lead_Name: lead.fields['Name'],\n    Contact: lead.fields['Contact'],\n    Property_Name: property.Property_Name || property['Property Name'] || '',\n    Area: property.Area || '',\n    Price: property.Price || '',\n    Bedrooms: property.Bedrooms || '',\n    Description: (property.Description || '').replace(/\\n/g, ' ').replace(/\\r/g, ' ')\n  }\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        144,
+        128
+      ],
+      "id": "2036f2d1-bab8-428d-85aa-d4d3bbbcfb02",
+      "name": "Prepare Lead List"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.Contact }}",
+        "subject": "A new property just listed that matches what you are looking for",
+        "message": "=<p>Hi {{ $json.Lead_Name }},</p>\n<p>A property just came available that fits what you told us you were looking for.</p>\n<p><strong>Property:</strong> {{ $json.Property_Name }}<br>\n<strong>Area:</strong> {{ $json.Area }}<br>\n<strong>Price:</strong> {{ $json.Price }}<br>\n<strong>Bedrooms:</strong> {{ $json.Bedrooms }}</p>\n<p>{{ $json.Description }}</p>\n<p>Interested in a viewing? Book a time here: https://cal.com/damii/property-viewing</p>\n<p>Looking forward to hearing from you.</p>\n\n\n\n",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        368,
+        128
+      ],
+      "id": "b7d5b593-2cc3-4cff-83b7-9403dc55d5a4",
+      "name": "New Listing Match",
+      "webhookId": "bee0cadc-1822-4ff8-88d6-c1a3f2913d86",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "cf51GucqhKZN6PU9",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "2de1ceb8-23b7-443e-b8b9-8fc29424451a",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -464,
+        128
+      ],
+      "id": "1685758d-b620-4db7-bf45-a5b49350fb9a",
+      "name": "New Property",
+      "webhookId": "2de1ceb8-23b7-443e-b8b9-8fc29424451a"
+    },
+    {
+      "parameters": {
+        "content": "## STAGE 1 - NEW LISTING TRIGGER\n### Fires when a new property is added. Property details mapped for matching.",
+        "height": 320,
+        "width": 368,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -496,
+        -32
+      ],
+      "typeVersion": 1,
+      "id": "ab148dea-3e81-43db-aa68-6c36d5f6a89a",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## STAGE 2 - LEAD MATCHING\n### Airtable searched for leads whose property interest matches the new listing area.\nOne email prepared per matching lead.",
+        "height": 320,
+        "width": 352,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -80,
+        -32
+      ],
+      "typeVersion": 1,
+      "id": "64ec6b9b-3779-4f88-8b62-18aabf99a308",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## STAGE 3 - INSTANT ALERTS\n### Every matching lead notified immediately with property details and booking link.",
+        "height": 336,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        320,
+        -48
+      ],
+      "typeVersion": 1,
+      "id": "1fd41837-8208-407c-9ca7-dfe41fc66524",
+      "name": "Sticky Note2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Airtable Trigger": {
+      "main": [
+        []
+      ]
+    },
+    "Map Property Data": {
+      "main": [
+        [
+          {
+            "node": "Search Matching Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Matching Leads": {
+      "main": [
+        [
+          {
+            "node": "Prepare Lead List",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Lead List": {
+      "main": [
+        [
+          {
+            "node": "New Listing Match",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "New Property": {
+      "main": [
+        [
+          {
+            "node": "Map Property Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "PqSKnPf8G4pSaNvC",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "209fe508-de62-47a2-8208-a15db81b20f3",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d730a0d19a20fc82f7b41660644c3a9f8305089ec2417b6f77f152d420f2429f"
+  },
+  "id": "axC0VjzC8q3imkO7",
+  "tags": []
+}

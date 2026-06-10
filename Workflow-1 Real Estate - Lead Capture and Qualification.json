@@ -1,0 +1,2111 @@
+{
+  "name": "Real Estate - Lead Capture and Qualification",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "f36af6b2-6a08-4f81-972d-60c6554199aa",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        112,
+        160
+      ],
+      "id": "00a0a7e5-bd0f-4ce3-b25a-3b103cc1803b",
+      "name": "Instagram - Lead Trigger",
+      "webhookId": "f36af6b2-6a08-4f81-972d-60c6554199aa"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "7858b779-9820-44c4-8296-d395717b3246",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        112,
+        544
+      ],
+      "id": "afc332d1-3d47-4465-825b-f03284dd009a",
+      "name": "Facebook - Lead Trigger",
+      "webhookId": "7858b779-9820-44c4-8296-d395717b3246"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "b3a7eb5e-5f79-4d28-a161-aa5bb60f2803",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        112,
+        352
+      ],
+      "id": "87f869d1-1972-463b-8b80-dfef5c3d1b81",
+      "name": "WhatsApp - Lead Trigger",
+      "webhookId": "b3a7eb5e-5f79-4d28-a161-aa5bb60f2803"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ca02087a-fc1b-4a50-8404-7d950c143b1b",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        112,
+        736
+      ],
+      "id": "4fe1207f-b997-4449-bca0-29f1a85a6925",
+      "name": "Tally - Website Form",
+      "webhookId": "ca02087a-fc1b-4a50-8404-7d950c143b1b"
+    },
+    {
+      "parameters": {
+        "numberInputs": 4
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        336,
+        416
+      ],
+      "id": "2005b781-5aa2-41c6-9071-1589b27f3f2e",
+      "name": "Merge Lead Sources"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3a598a06-93b0-4a92-8e39-915b4312aa83",
+              "name": "Lead_Name",
+              "value": "={{ $json.body.sender.name }}",
+              "type": "string"
+            },
+            {
+              "id": "21d47495-17e0-4607-9dae-74999df041a0",
+              "name": "Contact",
+              "value": "={{ $json.body.sender.id }}",
+              "type": "string"
+            },
+            {
+              "id": "12137cf6-2254-411b-b517-f72d9dcd4f6c",
+              "name": "Message_Text",
+              "value": "={{ $json.body.message.text }}",
+              "type": "string"
+            },
+            {
+              "id": "c9dd5901-e61d-40b3-b03a-01f2719436de",
+              "name": "Platform",
+              "value": "={{ $json.body.platform.charAt(0).toUpperCase() + $json.body.platform.slice(1) }}",
+              "type": "string"
+            },
+            {
+              "id": "463f62da-3dff-4d08-acbd-07b78b49621f",
+              "name": "Timestamp",
+              "value": "={{ $json.body.timestamp }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        784,
+        544
+      ],
+      "id": "ebea9026-c3e2-4c33-89d6-0968f4c7f7c9",
+      "name": "Map Lead Data"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer "
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "gpt-4o-mini"
+            },
+            {
+              "name": "max_tokens",
+              "value": "={{ 1024 }}"
+            },
+            {
+              "name": "messages",
+              "value": "={{ [{\"role\": \"system\", \"content\": \"You are a real estate lead qualification assistant. Return ONLY valid JSON, nothing else.\"}, {\"role\": \"user\", \"content\": \"Analyse this enquiry and return ONLY valid JSON.\\n\\nLead Name: \" + $json.Lead_Name + \"\\nMessage: \" + $json.Message_Text + \"\\nPlatform: \" + $json.Platform + \"\\n\\nReturn exactly:\\n{\\\"intent\\\": \\\"BUY, RENT, or BROWSING\\\",\\n\\\"urgency\\\": \\\"HIGH, MEDIUM, or LOW\\\",\\n\\\"lead_score\\\": number 1-100,\\n\\\"lead_tag\\\": \\\"HOT, WARM, or COLD\\\",\\n\\\"property_interest\\\": \\\"what type and area they want\\\",\\n\\\"budget\\\": \\\"their budget if mentioned or UNKNOWN\\\",\\n\\\"recommended_action\\\": \\\"one sentence on what to do next\\\",\\n\\\"reply_message\\\": \\\"warm friendly personalised reply. Start with 'Hi [First Name],' on its own line. Then a blank line. Then write each complete sentence as a full paragraph with no mid-sentence line breaks. Each paragraph separated by a blank line. Do not break sentences across lines.\\\"}\\n\\nScoring rules:\\nHOT (75-100): Ready to view, specific requirements, clear budget\\nWARM (50-74): Interested but vague, no urgency mentioned\\nCOLD (0-49): Just browsing, no clear intent or budget\\n\\nReturn ONLY JSON, nothing else.\"}] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1056,
+        448
+      ],
+      "id": "bbc3d7b5-0a11-4d8f-a5e9-88463da8786c",
+      "name": "Chatgpt Qualify Lead"
+    },
+    {
+      "parameters": {
+        "jsCode": "const content = $input.first().json.choices[0].message.content;\nconst clean = content.replace(/```json|```/g, \"\").trim();\nconst parsed = JSON.parse(clean);\n\nconst sourceNode = $input.first().json.Lead_Name ? $input.first() : null;\nconst mapNode = (() => {\n  try { return $('Map Lead Data').item.json; } catch(e) {}\n  try { return $('Map Tally Data').item.json; } catch(e) {}\n  return {};\n})();\n\nreturn [{\n  json: {\n    intent: parsed.intent,\n    urgency: parsed.urgency,\n    lead_score: parsed.lead_score,\n    lead_tag: parsed.lead_tag.trim(),\n    property_interest: parsed.property_interest,\n    budget: parsed.budget,\n    recommended_action: parsed.recommended_action,\n    reply_message: parsed.reply_message,\n    Lead_Name: mapNode.Lead_Name,\n    Contact: mapNode.Contact,\n    Message_Text: mapNode.Message_Text,\n    Platform: mapNode.Platform,\n    Timestamp: mapNode.Timestamp\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1232,
+        448
+      ],
+      "id": "6820a509-77b0-462a-9734-5e872123808e",
+      "name": "Parse Lead Analysis"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "f5e5e371-709d-4f57-b2a8-5167132a8d10",
+              "leftValue": "={{ $('Parse Lead Analysis').item.json.lead_tag }}",
+              "rightValue": "HOT",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1664,
+        448
+      ],
+      "id": "c6e7fcf9-99f7-4798-9786-865e279675f0",
+      "name": "Check HOT"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "5a98843c-4b0b-4350-afa7-08ea230d0a70",
+              "leftValue": "={{ $('Parse Lead Analysis').item.json.lead_tag }}",
+              "rightValue": "WARM",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1680,
+        688
+      ],
+      "id": "117eb050-88d0-4318-af2b-4d08e6f5d8ee",
+      "name": "Check WARM"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appJfSt8YbO1NAWjA",
+          "mode": "list",
+          "cachedResultName": " Real Estate CRM",
+          "cachedResultUrl": "https://airtable.com/appJfSt8YbO1NAWjA"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblOm3pbIKIYXl7p4",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://airtable.com/appJfSt8YbO1NAWjA/tblOm3pbIKIYXl7p4"
+        },
+        "filterByFormula": "={Contact} = \"{{ $('Parse Lead Analysis').item.json.Contact }}\"",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        2096,
+        208
+      ],
+      "id": "e4128f94-69a7-4b88-8f4e-96507cdf2c6d",
+      "name": "Search HOT Lead"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appJfSt8YbO1NAWjA",
+          "mode": "list",
+          "cachedResultName": " Real Estate CRM",
+          "cachedResultUrl": "https://airtable.com/appJfSt8YbO1NAWjA"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblOm3pbIKIYXl7p4",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://airtable.com/appJfSt8YbO1NAWjA/tblOm3pbIKIYXl7p4"
+        },
+        "filterByFormula": "=={{ '{Contact} = \"' + $('Parse Lead Analysis').item.json.Contact + '\"' }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        2192,
+        592
+      ],
+      "id": "b4d471cc-5395-4191-b96a-b1ead26fb216",
+      "name": "Search WARM Lead"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appJfSt8YbO1NAWjA",
+          "mode": "list",
+          "cachedResultName": " Real Estate CRM",
+          "cachedResultUrl": "https://airtable.com/appJfSt8YbO1NAWjA"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblOm3pbIKIYXl7p4",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://airtable.com/appJfSt8YbO1NAWjA/tblOm3pbIKIYXl7p4"
+        },
+        "filterByFormula": "={{ '{Contact} = \"' + $('Parse Lead Analysis').item.json.Contact + '\"' }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        2176,
+        944
+      ],
+      "id": "4aabae4d-20ff-4555-b3dd-e22bd074a891",
+      "name": "Search COLD Lead"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Parse Lead Analysis').item.json.Contact }}",
+        "subject": "={{ 'Great to hear from you - ' + $('Parse Lead Analysis').item.json.Lead_Name }}",
+        "emailType": "text",
+        "message": "={{ $('Parse Lead Analysis').item.json.reply_message }}\n\nWhen you are ready to take a look at available properties, kindly feel free to book a time here: https://cal.com/damii/property-viewing\n\nNo pressure, Happy to answer any questions in the meantime.",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1952,
+        592
+      ],
+      "id": "d7faba48-24c6-4db8-b772-61345c7d9d3d",
+      "name": "WARM Lead Reply",
+      "webhookId": "cec736e6-f6cf-4130-a2ff-5f2ccd67cdf8"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appJfSt8YbO1NAWjA",
+          "mode": "list",
+          "cachedResultName": " Real Estate CRM",
+          "cachedResultUrl": "https://airtable.com/appJfSt8YbO1NAWjA"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblOm3pbIKIYXl7p4",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://airtable.com/appJfSt8YbO1NAWjA/tblOm3pbIKIYXl7p4"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Status": "Nurture",
+            "Score": 0,
+            "id": "={{ $('Search WARM Lead').first().json.id }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Contact",
+              "displayName": "Contact",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Platform",
+              "displayName": "Platform",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Instagram",
+                  "value": "Instagram"
+                },
+                {
+                  "name": "Facebook",
+                  "value": "Facebook"
+                },
+                {
+                  "name": "Whatsapp",
+                  "value": "Whatsapp"
+                },
+                {
+                  "name": "Typeform",
+                  "value": "Typeform"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Message",
+              "displayName": "Message",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Intent",
+              "displayName": "Intent",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "BUY",
+                  "value": "BUY"
+                },
+                {
+                  "name": "RENT",
+                  "value": "RENT"
+                },
+                {
+                  "name": "BROWSING",
+                  "value": "BROWSING"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Urgency",
+              "displayName": "Urgency",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "HIGH",
+                  "value": "HIGH"
+                },
+                {
+                  "name": "MEDIUM",
+                  "value": "MEDIUM"
+                },
+                {
+                  "name": "LOW",
+                  "value": "LOW"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Score",
+              "displayName": "Score",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Tag",
+              "displayName": "Tag",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "HOT",
+                  "value": "HOT"
+                },
+                {
+                  "name": "WARM",
+                  "value": "WARM"
+                },
+                {
+                  "name": "COLD",
+                  "value": "COLD"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Property Interest",
+              "displayName": "Property Interest",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Budget",
+              "displayName": "Budget",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "New",
+                  "value": "New"
+                },
+                {
+                  "name": "Awaiting Booking",
+                  "value": "Awaiting Booking"
+                },
+                {
+                  "name": " Viewing Booked",
+                  "value": " Viewing Booked"
+                },
+                {
+                  "name": "Document Pending",
+                  "value": "Document Pending"
+                },
+                {
+                  "name": "Nurture",
+                  "value": "Nurture"
+                },
+                {
+                  "name": " Cold",
+                  "value": " Cold"
+                },
+                {
+                  "name": "Closed",
+                  "value": "Closed"
+                },
+                {
+                  "name": "Awaiting feedback",
+                  "value": "Awaiting feedback"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Closed",
+              "displayName": "Closed",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Last Contact",
+              "displayName": "Last Contact",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Submitted At",
+              "displayName": "Submitted At",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Viewing Date",
+              "displayName": "Viewing Date",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        2384,
+        592
+      ],
+      "id": "f2b4f8f8-9ccf-4f6c-bb72-bc3d7c8082f2",
+      "name": "Update WARM Status"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Parse Lead Analysis').item.json.Contact }}",
+        "subject": "Properties available in your area",
+        "emailType": "text",
+        "message": "=Hi {{ $('Parse Lead Analysis').item.json.Lead_Name }},\n\nThanks for reaching out. Here is a quick overview of what we currently have available.\n\n[Insert current listings or link to property page]\n\nWhen you are ready to explore further, we are happy to arrange a viewing at your convenience.",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1968,
+        944
+      ],
+      "id": "8b895477-1cf1-498c-8665-7de8bac1f4ce",
+      "name": "COLD Lead Reply",
+      "webhookId": "e094b426-a406-474e-9b8e-21dfc77e30e2"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appJfSt8YbO1NAWjA",
+          "mode": "list",
+          "cachedResultName": " Real Estate CRM",
+          "cachedResultUrl": "https://airtable.com/appJfSt8YbO1NAWjA"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblOm3pbIKIYXl7p4",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://airtable.com/appJfSt8YbO1NAWjA/tblOm3pbIKIYXl7p4"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Status": " Cold",
+            "Score": 0,
+            "id": "={{ $('Search COLD Lead').first().json.id }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Contact",
+              "displayName": "Contact",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Platform",
+              "displayName": "Platform",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Instagram",
+                  "value": "Instagram"
+                },
+                {
+                  "name": "Facebook",
+                  "value": "Facebook"
+                },
+                {
+                  "name": "Whatsapp",
+                  "value": "Whatsapp"
+                },
+                {
+                  "name": "Typeform",
+                  "value": "Typeform"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Message",
+              "displayName": "Message",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Intent",
+              "displayName": "Intent",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "BUY",
+                  "value": "BUY"
+                },
+                {
+                  "name": "RENT",
+                  "value": "RENT"
+                },
+                {
+                  "name": "BROWSING",
+                  "value": "BROWSING"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Urgency",
+              "displayName": "Urgency",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "HIGH",
+                  "value": "HIGH"
+                },
+                {
+                  "name": "MEDIUM",
+                  "value": "MEDIUM"
+                },
+                {
+                  "name": "LOW",
+                  "value": "LOW"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Score",
+              "displayName": "Score",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Tag",
+              "displayName": "Tag",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "HOT",
+                  "value": "HOT"
+                },
+                {
+                  "name": "WARM",
+                  "value": "WARM"
+                },
+                {
+                  "name": "COLD",
+                  "value": "COLD"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Property Interest",
+              "displayName": "Property Interest",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Budget",
+              "displayName": "Budget",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "New",
+                  "value": "New"
+                },
+                {
+                  "name": "Awaiting Booking",
+                  "value": "Awaiting Booking"
+                },
+                {
+                  "name": " Viewing Booked",
+                  "value": " Viewing Booked"
+                },
+                {
+                  "name": "Document Pending",
+                  "value": "Document Pending"
+                },
+                {
+                  "name": "Nurture",
+                  "value": "Nurture"
+                },
+                {
+                  "name": " Cold",
+                  "value": " Cold"
+                },
+                {
+                  "name": "Closed",
+                  "value": "Closed"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Closed",
+              "displayName": "Closed",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Last Contact",
+              "displayName": "Last Contact",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Submitted At",
+              "displayName": "Submitted At",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        2400,
+        944
+      ],
+      "id": "732fd263-15f3-4530-be01-c46326c15248",
+      "name": "Update COLD Status"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Parse Lead Analysis').item.json.Contact }}",
+        "subject": "={{ 'Thanks for reaching out — ' + $('Parse Lead Analysis').item.json.Lead_Name }}",
+        "emailType": "text",
+        "message": "={{ $('Parse Lead Analysis').item.json.reply_message }}\n\nTo book a viewing at a time that suits you, use the link below:\nhttps://cal.com/damii/property-viewing\n\nTo make the process as smooth as possible, please also have these ready before your viewing:\n\n- Valid government issued ID\n- Proof of funds or mortgage agreement in principle\n- Proof of address (utility bill or bank statement)\n\nThis helps us move quickly if you find the right property.\n\nLooking forward to speaking with you.",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1936,
+        208
+      ],
+      "id": "28c67157-b732-4808-92de-a28a9921b08d",
+      "name": "HOT Lead Reply",
+      "webhookId": "8fe699ec-a504-4ffb-96b7-1789cc500fb6"
+    },
+    {
+      "parameters": {
+        "sendTo": "kelvinjr995@gmail.com",
+        "subject": "={{ 'HOT Lead - ' + $('Parse Lead Analysis').item.json.Lead_Name + ' - Act Now' }}",
+        "emailType": "text",
+        "message": "=A HOT lead just came in. Respond within the hour.\n\nName: {{ $('Parse Lead Analysis').item.json.Lead_Name }}\nContact: {{ $('Parse Lead Analysis').item.json.Contact }}\nPlatform: {{ $('Parse Lead Analysis').item.json.Platform }}\nScore: {{ $('Parse Lead Analysis').item.json.lead_score }}/100\nIntent: {{ $('Parse Lead Analysis').item.json.intent }}\nProperty Interest: {{ $('Parse Lead Analysis').item.json.property_interest }}\nBudget: {{ $('Parse Lead Analysis').item.json.budget }}\nUrgency: {{ $('Parse Lead Analysis').item.json.urgency }}\n\nRecommended Action: {{ $('Parse Lead Analysis').item.json.recommended_action }}\n\nOriginal Message:\n{{ $('Parse Lead Analysis').item.json.Message_Text }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2272,
+        208
+      ],
+      "id": "6f81a8fc-cdc0-47a0-a6e6-fa3b85424c35",
+      "name": "HOT Lead Alert",
+      "webhookId": "59abfd2d-3b23-478a-8a4f-0d58fe649e5c"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appJfSt8YbO1NAWjA",
+          "mode": "list",
+          "cachedResultName": " Real Estate CRM",
+          "cachedResultUrl": "https://airtable.com/appJfSt8YbO1NAWjA"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblOm3pbIKIYXl7p4",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://airtable.com/appJfSt8YbO1NAWjA/tblOm3pbIKIYXl7p4"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Contact": "={{ $('Parse Lead Analysis').item.json.Contact }}",
+            "Status": "Awaiting Booking",
+            "Score": 0,
+            "id": "={{ $('Search HOT Lead').first().json.id }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Contact",
+              "displayName": "Contact",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Platform",
+              "displayName": "Platform",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Instagram",
+                  "value": "Instagram"
+                },
+                {
+                  "name": "Facebook",
+                  "value": "Facebook"
+                },
+                {
+                  "name": "Whatsapp",
+                  "value": "Whatsapp"
+                },
+                {
+                  "name": "Typeform",
+                  "value": "Typeform"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Message",
+              "displayName": "Message",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Intent",
+              "displayName": "Intent",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "BUY",
+                  "value": "BUY"
+                },
+                {
+                  "name": "RENT",
+                  "value": "RENT"
+                },
+                {
+                  "name": "BROWSING",
+                  "value": "BROWSING"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Urgency",
+              "displayName": "Urgency",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "HIGH",
+                  "value": "HIGH"
+                },
+                {
+                  "name": "MEDIUM",
+                  "value": "MEDIUM"
+                },
+                {
+                  "name": "LOW",
+                  "value": "LOW"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Score",
+              "displayName": "Score",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Tag",
+              "displayName": "Tag",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "HOT",
+                  "value": "HOT"
+                },
+                {
+                  "name": "WARM",
+                  "value": "WARM"
+                },
+                {
+                  "name": "COLD",
+                  "value": "COLD"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Property Interest",
+              "displayName": "Property Interest",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Budget",
+              "displayName": "Budget",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "New",
+                  "value": "New"
+                },
+                {
+                  "name": "Awaiting Booking",
+                  "value": "Awaiting Booking"
+                },
+                {
+                  "name": " Viewing Booked",
+                  "value": " Viewing Booked"
+                },
+                {
+                  "name": "Document Pending",
+                  "value": "Document Pending"
+                },
+                {
+                  "name": "Nurture",
+                  "value": "Nurture"
+                },
+                {
+                  "name": " Cold",
+                  "value": " Cold"
+                },
+                {
+                  "name": "Closed",
+                  "value": "Closed"
+                },
+                {
+                  "name": "Awaiting feedback",
+                  "value": "Awaiting feedback"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Closed",
+              "displayName": "Closed",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Last Contact",
+              "displayName": "Last Contact",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Submitted At",
+              "displayName": "Submitted At",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Viewing Date",
+              "displayName": "Viewing Date",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        2432,
+        208
+      ],
+      "id": "25a81e63-c4b5-4d75-9e76-661df0af54ab",
+      "name": "Update HOT Status"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appJfSt8YbO1NAWjA",
+          "mode": "list",
+          "cachedResultName": " Real Estate CRM",
+          "cachedResultUrl": "https://airtable.com/appJfSt8YbO1NAWjA"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblOm3pbIKIYXl7p4",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://airtable.com/appJfSt8YbO1NAWjA/tblOm3pbIKIYXl7p4"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $json.Lead_Name }}",
+            "Contact": "={{ $json.Contact }}",
+            "Platform": "={{ $json.body.platform.charAt(0).toUpperCase() + $json.body.platform.slice(1) }}",
+            "Message": "={{ $json.Message_Text }}",
+            "Intent": "={{ $json.intent }}",
+            "Urgency": "={{ $json.urgency }}",
+            "Score": "={{ $json.lead_score }}",
+            "Tag": "={{ $json.lead_tag }}",
+            "Property Interest": "={{ $json.property_interest }}",
+            "Budget": "={{ $json.budget }}",
+            "Status": "New",
+            "Submitted At": "={{ new Date($('Parse Lead Analysis').item.json.Timestamp).toISOString().split('T')[0] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Contact",
+              "displayName": "Contact",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Platform",
+              "displayName": "Platform",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Instagram",
+                  "value": "Instagram"
+                },
+                {
+                  "name": "Facebook",
+                  "value": "Facebook"
+                },
+                {
+                  "name": "Whatsapp",
+                  "value": "Whatsapp"
+                },
+                {
+                  "name": "Typeform",
+                  "value": "Typeform"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Message",
+              "displayName": "Message",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Intent",
+              "displayName": "Intent",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "BUY",
+                  "value": "BUY"
+                },
+                {
+                  "name": "RENT",
+                  "value": "RENT"
+                },
+                {
+                  "name": "BROWSING",
+                  "value": "BROWSING"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Urgency",
+              "displayName": "Urgency",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "HIGH",
+                  "value": "HIGH"
+                },
+                {
+                  "name": "MEDIUM",
+                  "value": "MEDIUM"
+                },
+                {
+                  "name": "LOW",
+                  "value": "LOW"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Score",
+              "displayName": "Score",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Tag",
+              "displayName": "Tag",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "HOT",
+                  "value": "HOT"
+                },
+                {
+                  "name": "WARM",
+                  "value": "WARM"
+                },
+                {
+                  "name": "COLD",
+                  "value": "COLD"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Property Interest",
+              "displayName": "Property Interest",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Budget",
+              "displayName": "Budget",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "New",
+                  "value": "New"
+                },
+                {
+                  "name": "Awaiting Booking",
+                  "value": "Awaiting Booking"
+                },
+                {
+                  "name": " Viewing Booked",
+                  "value": " Viewing Booked"
+                },
+                {
+                  "name": "Document Pending",
+                  "value": "Document Pending"
+                },
+                {
+                  "name": "Nurture",
+                  "value": "Nurture"
+                },
+                {
+                  "name": " Cold",
+                  "value": " Cold"
+                },
+                {
+                  "name": "Closed",
+                  "value": "Closed"
+                },
+                {
+                  "name": "Awaiting feedback",
+                  "value": "Awaiting feedback"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Closed",
+              "displayName": "Closed",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Last Contact",
+              "displayName": "Last Contact",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Submitted At",
+              "displayName": "Submitted At",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Viewing Date",
+              "displayName": "Viewing Date",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1456,
+        448
+      ],
+      "id": "71495789-df56-441b-a857-915e2cb1d829",
+      "name": "Log Lead"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "18957fa5-35b3-4166-987a-091dd9a6cae8",
+              "name": "Lead_Name",
+              "value": "={{ $json.body.data.fields[0].value }}",
+              "type": "string"
+            },
+            {
+              "id": "01a7d967-a877-4245-8b69-4db4a06095c4",
+              "name": "Contact",
+              "value": "={{ $json.body.data.fields[1].value }}",
+              "type": "string"
+            },
+            {
+              "id": "cad20f59-1d58-4a00-a057-8023b6f33e52",
+              "name": "Phone",
+              "value": "={{ $json.body.data.fields[2].value }}",
+              "type": "string"
+            },
+            {
+              "id": "5b40ae99-61e0-4156-8d74-2a218d80cd65",
+              "name": "Message_Text",
+              "value": "={{ 'Looking to ' + $json.body.data.fields[3].options[0].text + ' a ' + $json.body.data.fields[4].value + ' in ' + $json.body.data.fields[5].value + '. Budget: ' + $json.body.data.fields[6].value + '. Timeline: ' + $json.body.data.fields[7].value }}",
+              "type": "string"
+            },
+            {
+              "id": "d4a0c870-cb34-4186-b58b-367f7aa383b0",
+              "name": "Platform",
+              "value": "typeforn",
+              "type": "string"
+            },
+            {
+              "id": "5acb1efb-fa87-40d5-af76-8bd0139e920d",
+              "name": "Timestamp",
+              "value": "={{ $json.body.createdAt }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        784,
+        352
+      ],
+      "id": "7f9bb1c2-2ecb-4737-9b63-1bada729c086",
+      "name": "Map Tally Data"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "3bb468b7-81b8-41d5-936d-769299c56bbf",
+              "leftValue": "={{ $json.body.eventType }}",
+              "rightValue": "FORM_RESPONSE",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        560,
+        448
+      ],
+      "id": "3a0ffed1-0154-440e-9d1b-92175bdd122c",
+      "name": "Check Platform Source"
+    },
+    {
+      "parameters": {
+        "content": "## STAGE 1  LEAD CAPTURE\n\n### INSTAGRAM,  FACEBOOK,  WHATSAPP  and  TALLY  form\n### submissions   all  captured  simultaneously  and merged  into one  unified  data  stream",
+        "height": 880,
+        "width": 464,
+        "color": "#0C1D73"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        0,
+        0
+      ],
+      "typeVersion": 1,
+      "id": "d2fd44dd-eed0-4ebb-9226-1c8089c2fe7b",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## STAGE 2 - DATA MAPPING\n\n### Platform source detected and routed to correct mapping node.\n\n### All fields standardised before AI processing.",
+        "height": 592,
+        "width": 416,
+        "color": "#292329"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        496,
+        144
+      ],
+      "typeVersion": 1,
+      "id": "7f32a3d1-8339-440c-a4fc-66577a054af1",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## STAGE 3 - AI QUALIFICATION\n\n### OpenAI analyses every lead message.\n\n### Scores 1-100, detects intent, urgency, buying signals and generates personalized reply.",
+        "height": 448,
+        "width": 432,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        944,
+        192
+      ],
+      "typeVersion": 1,
+      "id": "0dbaefe8-648e-4248-a1d5-4e24eec220c7",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## STAGE 4 - LOG & ROUTE\n\n### Every lead logged to Airtable CRM first.\n\n### IF nodes route to HOT, WARM or COLD branch based on AI tag.",
+        "height": 688,
+        "width": 416,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1408,
+        144
+      ],
+      "typeVersion": 1,
+      "id": "beb8b438-c6f9-4842-bb38-4bfb0da82572",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## HOT BRANCH\n\n### Instant reply + document checklist sent to lead.\n\n### Agent alerted immediately. Status: Awaiting Booking.",
+        "height": 352,
+        "width": 768,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1856,
+        32
+      ],
+      "typeVersion": 1,
+      "id": "43d44e50-b0c8-4560-aaec-c3869c5a4761",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "## WARM BRANCH\n\n### Personalised reply sent to lead. \n\n### Agent notified. Status: Nurture.",
+        "height": 336,
+        "width": 720
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1856,
+        416
+      ],
+      "typeVersion": 1,
+      "id": "578f2fa4-150a-44e3-82bf-cda1005362ee",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "## COLD BRANCH\n\n### Property information sent to lead, Logged silently.\n\n### Status: Cold.",
+        "height": 320,
+        "width": 720,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1856,
+        784
+      ],
+      "typeVersion": 1,
+      "id": "b8dba826-e7c9-4846-9f40-e6d48cd4f7a0",
+      "name": "Sticky Note6"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Tally - Website Form": {
+      "main": [
+        [
+          {
+            "node": "Merge Lead Sources",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Instagram - Lead Trigger": {
+      "main": [
+        [
+          {
+            "node": "Merge Lead Sources",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WhatsApp - Lead Trigger": {
+      "main": [
+        [
+          {
+            "node": "Merge Lead Sources",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Facebook - Lead Trigger": {
+      "main": [
+        [
+          {
+            "node": "Merge Lead Sources",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Merge Lead Sources": {
+      "main": [
+        [
+          {
+            "node": "Check Platform Source",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Map Lead Data": {
+      "main": [
+        [
+          {
+            "node": "Chatgpt Qualify Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chatgpt Qualify Lead": {
+      "main": [
+        [
+          {
+            "node": "Parse Lead Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Lead Analysis": {
+      "main": [
+        [
+          {
+            "node": "Log Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check HOT": {
+      "main": [
+        [
+          {
+            "node": "HOT Lead Reply",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Check WARM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check WARM": {
+      "main": [
+        [
+          {
+            "node": "WARM Lead Reply",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "COLD Lead Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search HOT Lead": {
+      "main": [
+        [
+          {
+            "node": "HOT Lead Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search WARM Lead": {
+      "main": [
+        [
+          {
+            "node": "Update WARM Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search COLD Lead": {
+      "main": [
+        [
+          {
+            "node": "Update COLD Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WARM Lead Reply": {
+      "main": [
+        [
+          {
+            "node": "Search WARM Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "COLD Lead Reply": {
+      "main": [
+        [
+          {
+            "node": "Search COLD Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HOT Lead Reply": {
+      "main": [
+        [
+          {
+            "node": "Search HOT Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HOT Lead Alert": {
+      "main": [
+        [
+          {
+            "node": "Update HOT Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Lead": {
+      "main": [
+        [
+          {
+            "node": "Check HOT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Map Tally Data": {
+      "main": [
+        [
+          {
+            "node": "Chatgpt Qualify Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Platform Source": {
+      "main": [
+        [
+          {
+            "node": "Map Tally Data",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Map Lead Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "4793b031-d746-43b0-ab06-f156bcd4c4d0",
+  "meta": {
+    "instanceId": "4894e6668c6b287c01226b0c31b352999bde257c00f16aaa5a3d211d1541e55a"
+  },
+  "id": "dP2itJXWPltqXNDH",
+  "tags": []
+}

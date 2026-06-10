@@ -1,0 +1,1132 @@
+{
+  "name": "Real Estate - Viewing and Post-Viewing",
+  "nodes": [
+    {
+      "parameters": {
+        "events": [
+          "BOOKING_CREATED"
+        ],
+        "options": {}
+      },
+      "type": "n8n-nodes-base.calTrigger",
+      "typeVersion": 2,
+      "position": [
+        -416,
+        -16
+      ],
+      "id": "997cfa78-29ba-48eb-a42b-09e0d3b6551d",
+      "name": "Cal.com Trigger",
+      "webhookId": "b78dc28e-5d31-4f04-aae4-5379e6877a9b",
+      "credentials": {
+        "calApi": {
+          "id": "tGLoJSM647f9iDA4",
+          "name": "Cal account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "741edb18-d553-48b8-b989-18a62eb6fb1c",
+              "name": "Lead_Name",
+              "value": "={{ $json.attendees[0].name }}",
+              "type": "string"
+            },
+            {
+              "id": "e152fb74-17e7-4ed2-990e-7b9066c5bf77",
+              "name": "Lead_Email",
+              "value": "={{ $json.attendees[0].email }}",
+              "type": "string"
+            },
+            {
+              "id": "d2888a02-73e8-4db2-8a7b-61d51262df79",
+              "name": "Viewing_Time",
+              "value": "={{ $json.startTime }}",
+              "type": "string"
+            },
+            {
+              "id": "64677897-5a7f-4f87-a8da-704bc731bdd8",
+              "name": "Property_Address",
+              "value": "={{ $json.title }}",
+              "type": "string"
+            },
+            {
+              "id": "a570b5ad-5a3d-416d-a592-6f74d80944b2",
+              "name": "Agent_Email",
+              "value": "={{ $json.organizer.email }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -208,
+        -16
+      ],
+      "id": "10d9bb99-cbb8-485b-8893-200eebebb373",
+      "name": "Map Booking Data"
+    },
+    {
+      "parameters": {
+        "resume": "specificTime",
+        "dateTime": "={{ new Date(new Date($('Map Booking Data').item.json.Viewing_Time).getTime() - 24 * 60 * 60 * 1000).toISOString() }}"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        864,
+        -16
+      ],
+      "id": "f8cfce8d-41e0-438c-945c-be1c029c087d",
+      "name": "Wait Until 24hrs Before Viewing",
+      "webhookId": "d21b1649-a286-4177-9bca-9b93d6db96c7"
+    },
+    {
+      "parameters": {
+        "resume": "specificTime",
+        "dateTime": "={{ new Date(new Date($('Map Booking Data').item.json.Viewing_Time).getTime() + 3 * 60 * 60 * 1000).toISOString() }}"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1296,
+        -16
+      ],
+      "id": "83e80777-ece2-4eb8-8ef0-c00025cbe275",
+      "name": "Wait Until Post Viewing",
+      "webhookId": "cd49d750-8fe7-4e4b-a3f7-2bd584af8e8d"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appJfSt8YbO1NAWjA",
+          "mode": "list",
+          "cachedResultName": " Real Estate CRM",
+          "cachedResultUrl": "https://airtable.com/appJfSt8YbO1NAWjA"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblOm3pbIKIYXl7p4",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://airtable.com/appJfSt8YbO1NAWjA/tblOm3pbIKIYXl7p4"
+        },
+        "filterByFormula": "={{ $('Map Booking Data').item.json.Lead_Email }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1664,
+        -16
+      ],
+      "id": "46788641-ca47-4dc2-a85d-d0f264b1f600",
+      "name": "Search records",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "JUP90O0LDz0CZmfX",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Map Booking Data').item.json.Lead_Email }}",
+        "subject": "Your property viewing is confirmed",
+        "emailType": "text",
+        "message": "=Hi {{ $('Map Booking Data').item.json.Lead_Name }},\n\nYour viewing is confirmed.\n\nDate and Time: {{ $('Map Booking Data').item.json.Viewing_Time }}\nProperty: {{ $('Map Booking Data').item.json.Property_Address }}\n\nPlease bring your valid ID and any documents you have ready.\n\nSee you then.",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        16,
+        -16
+      ],
+      "id": "dac49c09-5b37-47ca-8ae4-89cbecfe5c5d",
+      "name": "Viewing Confirmed",
+      "webhookId": "89043ff0-0019-42ca-b0ea-9ee14d5f0752",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "cf51GucqhKZN6PU9",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Map Booking Data').item.json.Agent_Email }}",
+        "subject": "={{ 'Viewing confirmed - ' + $('Map Booking Data').item.json.Lead_Name }}",
+        "emailType": "text",
+        "message": "=",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        208,
+        -16
+      ],
+      "id": "639c7611-aa13-4e72-a2e4-44accdea07bc",
+      "name": "Agent Viewing Alert",
+      "webhookId": "7f05bf17-b2b4-44dd-b91e-5f138f01fefa",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "cf51GucqhKZN6PU9",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appJfSt8YbO1NAWjA",
+          "mode": "list",
+          "cachedResultName": " Real Estate CRM",
+          "cachedResultUrl": "https://airtable.com/appJfSt8YbO1NAWjA"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblOm3pbIKIYXl7p4",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://airtable.com/appJfSt8YbO1NAWjA/tblOm3pbIKIYXl7p4"
+        },
+        "filterByFormula": "={{ '{Contact} = \"' + $('Map Booking Data').item.json.Lead_Email + '\"' }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        448,
+        -16
+      ],
+      "id": "2999aaec-3f16-44a1-9888-0013b03f10cf",
+      "name": "Search Lead",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "JUP90O0LDz0CZmfX",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appJfSt8YbO1NAWjA",
+          "mode": "list",
+          "cachedResultName": " Real Estate CRM",
+          "cachedResultUrl": "https://airtable.com/appJfSt8YbO1NAWjA"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblOm3pbIKIYXl7p4",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://airtable.com/appJfSt8YbO1NAWjA/tblOm3pbIKIYXl7p4"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Search Lead')Search Lead') Search Lead').item.json.id }}",
+            "Score": 0,
+            "Status": " Viewing Booked",
+            "Viewing Date": "={{ new Date($('Map Booking Data').item.json.Viewing_Time).toISOString().split('T')[0] }}",
+            "Last Contact": "={{ new Date().toISOString().split('T')[0] }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Contact",
+              "displayName": "Contact",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Platform",
+              "displayName": "Platform",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Instagram",
+                  "value": "Instagram"
+                },
+                {
+                  "name": "Facebook",
+                  "value": "Facebook"
+                },
+                {
+                  "name": "Whatsapp",
+                  "value": "Whatsapp"
+                },
+                {
+                  "name": "Typeform",
+                  "value": "Typeform"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Message",
+              "displayName": "Message",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Intent",
+              "displayName": "Intent",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "BUY",
+                  "value": "BUY"
+                },
+                {
+                  "name": "RENT",
+                  "value": "RENT"
+                },
+                {
+                  "name": "BROWSING",
+                  "value": "BROWSING"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Urgency",
+              "displayName": "Urgency",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "HIGH",
+                  "value": "HIGH"
+                },
+                {
+                  "name": "MEDIUM",
+                  "value": "MEDIUM"
+                },
+                {
+                  "name": "LOW",
+                  "value": "LOW"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Score",
+              "displayName": "Score",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Tag",
+              "displayName": "Tag",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "HOT",
+                  "value": "HOT"
+                },
+                {
+                  "name": "WARM",
+                  "value": "WARM"
+                },
+                {
+                  "name": "COLD",
+                  "value": "COLD"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Property Interest",
+              "displayName": "Property Interest",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Budget",
+              "displayName": "Budget",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "New",
+                  "value": "New"
+                },
+                {
+                  "name": "Awaiting Booking",
+                  "value": "Awaiting Booking"
+                },
+                {
+                  "name": " Viewing Booked",
+                  "value": " Viewing Booked"
+                },
+                {
+                  "name": "Document Pending",
+                  "value": "Document Pending"
+                },
+                {
+                  "name": "Nurture",
+                  "value": "Nurture"
+                },
+                {
+                  "name": " Cold",
+                  "value": " Cold"
+                },
+                {
+                  "name": "Closed",
+                  "value": "Closed"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Closed",
+              "displayName": "Closed",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Last Contact",
+              "displayName": "Last Contact",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Submitted At",
+              "displayName": "Submitted At",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Viewing Date",
+              "displayName": "Viewing Date",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        624,
+        -16
+      ],
+      "id": "b65b38b0-66b3-4397-9f92-0453c47299f1",
+      "name": "Update Viewing Status",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "JUP90O0LDz0CZmfX",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Map Booking Data').item.json.Lead_Email }}",
+        "subject": "Reminder - Your property viewing is tomorrow",
+        "emailType": "text",
+        "message": "=Hi {{ $('Map Booking Data').item.json.Lead_Name }},\n\nJust a reminder that your property viewing is tomorrow.\n\nTime: {{ $('Map Booking Data').item.json.Viewing_Time }}\nAddress: {{ $('Map Booking Data').item.json.Property_Address }}\n\nSee you then. Feel free to reach out if anything changes.",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1088,
+        -16
+      ],
+      "id": "3db6f225-847f-4af1-862d-74e0bdc0925e",
+      "name": "Viewing Reminder",
+      "webhookId": "1b03354f-7e36-4936-bbb1-81b42f9cadb5",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "cf51GucqhKZN6PU9",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Map Booking Data').item.json.Lead_Email }}",
+        "subject": "=How did the viewing go?",
+        "emailType": "text",
+        "message": "=Hi {{ $('Map Booking Data').item.json.Lead_Name }},\n\nHope the viewing went well. Did the property feel like a good fit?\n\nHappy to answer any questions, arrange a second look, or discuss next steps whenever you are ready.\n",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1488,
+        -16
+      ],
+      "id": "566b922c-554a-48fe-b823-de40a01d4d14",
+      "name": "Post Viewing Check-in",
+      "webhookId": "a43d2915-0f40-40a9-bb80-88f925834aae",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "cf51GucqhKZN6PU9",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appJfSt8YbO1NAWjA",
+          "mode": "list",
+          "cachedResultName": " Real Estate CRM",
+          "cachedResultUrl": "https://airtable.com/appJfSt8YbO1NAWjA"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblOm3pbIKIYXl7p4",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://airtable.com/appJfSt8YbO1NAWjA/tblOm3pbIKIYXl7p4"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Score": 0,
+            "Last Contact": "={{ new Date().toISOString().split('T')[0] }}",
+            "Status": "Awaiting feedback"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Contact",
+              "displayName": "Contact",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Platform",
+              "displayName": "Platform",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Instagram",
+                  "value": "Instagram"
+                },
+                {
+                  "name": "Facebook",
+                  "value": "Facebook"
+                },
+                {
+                  "name": "Whatsapp",
+                  "value": "Whatsapp"
+                },
+                {
+                  "name": "Typeform",
+                  "value": "Typeform"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Message",
+              "displayName": "Message",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Intent",
+              "displayName": "Intent",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "BUY",
+                  "value": "BUY"
+                },
+                {
+                  "name": "RENT",
+                  "value": "RENT"
+                },
+                {
+                  "name": "BROWSING",
+                  "value": "BROWSING"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Urgency",
+              "displayName": "Urgency",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "HIGH",
+                  "value": "HIGH"
+                },
+                {
+                  "name": "MEDIUM",
+                  "value": "MEDIUM"
+                },
+                {
+                  "name": "LOW",
+                  "value": "LOW"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Score",
+              "displayName": "Score",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Tag",
+              "displayName": "Tag",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "HOT",
+                  "value": "HOT"
+                },
+                {
+                  "name": "WARM",
+                  "value": "WARM"
+                },
+                {
+                  "name": "COLD",
+                  "value": "COLD"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Property Interest",
+              "displayName": "Property Interest",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Budget",
+              "displayName": "Budget",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "New",
+                  "value": "New"
+                },
+                {
+                  "name": "Awaiting Booking",
+                  "value": "Awaiting Booking"
+                },
+                {
+                  "name": " Viewing Booked",
+                  "value": " Viewing Booked"
+                },
+                {
+                  "name": "Document Pending",
+                  "value": "Document Pending"
+                },
+                {
+                  "name": "Nurture",
+                  "value": "Nurture"
+                },
+                {
+                  "name": " Cold",
+                  "value": " Cold"
+                },
+                {
+                  "name": "Closed",
+                  "value": "Closed"
+                },
+                {
+                  "name": "Awaiting feedback",
+                  "value": "Awaiting feedback"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Closed",
+              "displayName": "Closed",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Last Contact",
+              "displayName": "Last Contact",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Submitted At",
+              "displayName": "Submitted At",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Viewing Date",
+              "displayName": "Viewing Date",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1840,
+        -16
+      ],
+      "id": "9d917b8e-6f2f-4ba8-82b5-fb261b1f5b2a",
+      "name": "Awaiting feedback",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "JUP90O0LDz0CZmfX",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## STAGE 1 - BOOKING TRIGGER\n\n### Cal.com fires when viewing is booked.\n\n### Lead details mapped from booking payload.",
+        "height": 368,
+        "width": 400,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -480,
+        -208
+      ],
+      "typeVersion": 1,
+      "id": "cdcdfa71-52d2-477c-8e6d-0d0893971aec",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## STAGE 2 - INSTANT NOTIFICATIONS\n\n### Confirmation sent to lead with date and time.\n\n### Agent briefed with full lead details.",
+        "height": 368,
+        "width": 416,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -48,
+        -208
+      ],
+      "typeVersion": 1,
+      "id": "35e89a03-3f53-4f50-8526-ca889f89ff66",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## STAGE 3 - CRM UPDATE\n\n### Lead record found by email, status updated to Viewing Booked.\n\n### Viewing date recorded automatically.",
+        "height": 368,
+        "width": 368
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        400,
+        -208
+      ],
+      "typeVersion": 1,
+      "id": "5505fc34-13a7-44d6-9fff-b3fb265ef240",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## STAGE 4 - 24HR REMINDER\n\n### System waits until exactly 24 hours before viewing then fires reminder to lead.",
+        "height": 368,
+        "width": 416,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        800,
+        -208
+      ],
+      "typeVersion": 1,
+      "id": "a7f52c83-8ddc-4d73-b1df-980f95df12fc",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## STAGE 5 - POST VIEWING FOLLOW-UP\n\n### 3 hours after viewing a check-in email fires.\n\n### Status updated to Awaiting Feedback.",
+        "height": 368,
+        "width": 848,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1232,
+        -208
+      ],
+      "typeVersion": 1,
+      "id": "1dbf5538-32f5-4571-8f5e-5e33472ffe7f",
+      "name": "Sticky Note4"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Cal.com Trigger": {
+      "main": [
+        [
+          {
+            "node": "Map Booking Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Map Booking Data": {
+      "main": [
+        [
+          {
+            "node": "Viewing Confirmed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait Until 24hrs Before Viewing": {
+      "main": [
+        [
+          {
+            "node": "Viewing Reminder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait Until Post Viewing": {
+      "main": [
+        [
+          {
+            "node": "Post Viewing Check-in",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Viewing Confirmed": {
+      "main": [
+        [
+          {
+            "node": "Agent Viewing Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agent Viewing Alert": {
+      "main": [
+        [
+          {
+            "node": "Search Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Lead": {
+      "main": [
+        [
+          {
+            "node": "Update Viewing Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Viewing Status": {
+      "main": [
+        [
+          {
+            "node": "Wait Until 24hrs Before Viewing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Viewing Reminder": {
+      "main": [
+        [
+          {
+            "node": "Wait Until Post Viewing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post Viewing Check-in": {
+      "main": [
+        [
+          {
+            "node": "Search records",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search records": {
+      "main": [
+        [
+          {
+            "node": "Awaiting feedback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "PqSKnPf8G4pSaNvC",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "9e844929-1f6d-42eb-bdc0-1a10c2413a5e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d730a0d19a20fc82f7b41660644c3a9f8305089ec2417b6f77f152d420f2429f"
+  },
+  "id": "sFljJeeTELuKCgIk",
+  "tags": []
+}
