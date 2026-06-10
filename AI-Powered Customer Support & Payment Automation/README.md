@@ -1,5 +1,4 @@
-## From first message to payment confirmation is fully automated,
-zero human involvement, running 24/7.
+## From first message to payment confirmation is fully automated, zero human involvement, running 24/7.
 
 ## THE PROBLEM
 
