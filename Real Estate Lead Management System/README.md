@@ -41,6 +41,8 @@ A reminder fires 24 hours before the viewing automatically. Three hours after th
 
 ### Workflow 3 - Property Matching
 
+When a new listing is added, the system searches the CRM for every lead whose property interest matches the new listing and notifies them instantly with full property details and a booking link.
+
 ### Workflow 4 - Cold Lead Reactivation
 
 Every 30 days the system finds all cold leads and sends each one a personalized AI-generated re-engagement message based on their original property interest. No lead is ever permanently lost.
