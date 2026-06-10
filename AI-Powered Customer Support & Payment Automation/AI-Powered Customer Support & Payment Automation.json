@@ -1,0 +1,532 @@
+{
+  "name": "Customer Support System With Payment Integration",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are Jeff, a friendly and straightforward assistant for automatesit.co. You help visitors understand what we do and how we can help their business run smoother with automation.\n\nKeep your tone warm and conversational, like you are talking to a friend who just asked you a question. Do not sound like a robot. Do not use big fancy words. If someone seems confused, simplify things further.\n\nThe chat widget has already greeted the user with \"Hey there! Welcome to automatesit.co, I'm Jeff. How can I help you today?\" so do not greet them again or introduce yourself when they send their first message. Jump straight into responding to whatever they say.\n\nOnly when someone asks about your services or what you do should you then explain what automatesit.co offers and the pricing.\n\nHere is what we offer and what it costs\n\nBusiness Process Automation starts at 150,000 naira. This is for businesses that want to remove repetitive manual tasks from their workflow.\n\nWhatsApp and Email Automation starts at 80,000 naira. This covers automated follow ups, responses and customer communication flows.\n\nCRM and Sales Pipeline Automation starts at 120,000 naira. This helps businesses track leads and close deals without dropping the ball.\n\nSocial Media Scheduling and Automation starts at 60,000 naira. We set up systems that keep your online presence active without you lifting a finger daily.\n\nFull Business Automation Audit is 50,000 naira. We look at your entire operation and tell you exactly what should be automated and how.\n\nWhen a customer is ready to make a payment collect four things from them first. Their full name, email address, phone number and confirm the service they are paying for so you know the exact amount. Once you have all four call the Payment System tool and pass in their email, phone number, the amount in naira and generate a unique transaction reference using the format ref followed by the current timestamp for example ref1709047200000. After calling the tool share the payment link with the customer and let them know they can go ahead to complete their payment.\n\nIf someone asks about pricing be honest and direct. If someone asks something you are not sure about tell them you will get someone from the team to follow up. Always end by asking if there is anything else you can help with but do it naturally not robotically."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -352,
+        -128
+      ],
+      "id": "1ef1b886-9125-445f-9ea5-bc98d29d70cd",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -256,
+        80
+      ],
+      "id": "2ec22fb3-03d4-4e40-b768-8cfef17703ce",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "Kxhtzx53KtUlASYd",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/Kxhtzx53KtUlASYd",
+          "cachedResultName": "My workflow 2"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "email": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('email', ``, 'string') }}",
+            "amount": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('amount', ``, 'string') }}",
+            "phone_number": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('phone_number', ``, 'string') }}",
+            "transaction_reference": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('transaction_reference', ``, 'string') }}",
+            "full_name": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('full_name', ``, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "full_name",
+              "displayName": "full_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "amount",
+              "displayName": "amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "phone_number",
+              "displayName": "phone_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "transaction_reference",
+              "displayName": "transaction_reference",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        -64,
+        112
+      ],
+      "id": "b0350ff1-d557-4c5a-a239-fea4442dd0c2",
+      "name": "Payment System"
+    },
+    {
+      "parameters": {
+        "content": "When Executed by Another Workflow → receives the payment details from Jeff (email, amount, phone number, transaction reference)\n\nGenerate Payment → hits the Paystack API to initialize the transaction and returns a payment link",
+        "height": 336,
+        "width": 560,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1488,
+        96
+      ],
+      "typeVersion": 1,
+      "id": "23442f35-a88c-4da4-baa4-0a1a82262002",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "Webhook → listens for Paystack's charge.success event after a customer completes payment\n\nIf → checks that the event is charge.success before proceeding\n\nSend a message → sends the HTML payment confirmation email via Gmail to notify you that payment has been received",
+        "height": 288,
+        "width": 944,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -656,
+        256
+      ],
+      "typeVersion": 1,
+      "id": "13bc3ba7-22a2-43e1-96df-e8f5ffc1857f",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "When chat message received → triggers the whole flow when a customer sends a message via the chat interface\n\nEdit Fields → cleans up or maps the incoming chat data before passing it to the agent",
+        "height": 288,
+        "width": 416,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -896,
+        -256
+      ],
+      "typeVersion": 1,
+      "id": "a2d40ae3-33d0-48dc-a9a6-c5ae6baed83c",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "AI Agent → this is Jeff, powered by the Anthropic Chat Model, with Simple Memory to remember the conversation context and the Payment System tool to trigger payments when ready\n\nChat Send Message → sends Jeff's response back to the customer",
+        "height": 496,
+        "width": 688,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -448,
+        -256
+      ],
+      "typeVersion": 1,
+      "id": "4a918918-3887-4358-a5f1-5fb2b905eff5",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "21f25461-560a-4a2e-8f1a-ad5557a571f3",
+              "name": "chatInput",
+              "value": "={{ $json.chatInput }}",
+              "type": "string"
+            },
+            {
+              "id": "c3a40b96-3aed-4c21-af99-7f8091ee461d",
+              "name": "sessionId",
+              "value": "= {{ $json.sessionId || \"test-session\" }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -624,
+        -128
+      ],
+      "id": "dc87999f-ff0e-4c27-8d39-b9f7714e0082",
+      "name": "Prepare Chat Data"
+    },
+    {
+      "parameters": {
+        "public": true,
+        "initialMessages": "Hi there! Welcome to automatesit.co 😊\n\nI'm Jeff. How can I help you today?",
+        "options": {
+          "responseMode": "responseNodes"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -848,
+        -128
+      ],
+      "id": "3f7d7902-b496-40dd-95d7-1c79fa5c2bed",
+      "name": "Customer Message Trigger",
+      "webhookId": "01eb7ee8-b416-43c3-ade4-1eb107c8a7bb"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "claude-sonnet-4-6",
+          "mode": "list",
+          "cachedResultName": "Claude Sonnet 4.6"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        -416,
+        96
+      ],
+      "id": "57970519-9e17-4fec-8068-cfe1c3e82cdc",
+      "name": "Jeff – AI Sales Assistant",
+      "credentials": {
+        "anthropicApi": {
+          "id": "rQtS3R1C92WMUCcg",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "message": "={{ $json.output }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chat",
+      "typeVersion": 1.2,
+      "position": [
+        64,
+        -128
+      ],
+      "id": "9ffaf9b0-452f-44bf-b246-cd7830e12c3e",
+      "name": "Send Jeff's Reply",
+      "webhookId": "6f189d60-c016-4857-b67f-5faaf51efedf"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "full_name"
+            },
+            {
+              "name": "email"
+            },
+            {
+              "name": "amount"
+            },
+            {
+              "name": "phone_number"
+            },
+            {
+              "name": "transaction_reference"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -1424,
+        256
+      ],
+      "id": "95ff3547-fe45-487b-94d2-c664dbbe5c2a",
+      "name": "Receive Payment Details"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.paystack.co/transaction/initialize",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "BEARER sk_test_567852a194bd95cd3b9b2d4df33bb32822534444"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "=full_name",
+              "value": "={{ $json.full_name }}"
+            },
+            {
+              "name": "email",
+              "value": "={{ $json.email }}"
+            },
+            {
+              "name": "amount",
+              "value": "={{$json.amount * 100}}"
+            },
+            {
+              "name": "phone_number",
+              "value": "={{ $json.phone_number }}"
+            },
+            {
+              "name": "transaction_reference",
+              "value": "={{ $json.transaction_reference }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -1120,
+        256
+      ],
+      "id": "c63c2eb1-a3f9-4584-9fb2-8bad5d05ba69",
+      "name": "Create Paystack Payment Link"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "c61490ca-ae57-4680-8158-1fc7a7f45d01",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -608,
+        384
+      ],
+      "id": "178493a4-26c7-4445-b4d2-13ded7993523",
+      "name": "Paystack Payment Webhook",
+      "webhookId": "c61490ca-ae57-4680-8158-1fc7a7f45d01"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "1e7f9d89-50d4-4c7b-9544-e3f3a8f1f735",
+              "leftValue": "={{ $json.body.event }}",
+              "rightValue": "charge.success",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -288,
+        384
+      ],
+      "id": "7ade6191-8d04-41d1-81d7-cb72090a6da9",
+      "name": "Check Payment Success"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.body.data.customer.email }}",
+        "subject": "=New payment received\n\nCustomer: {{ $json.body.data.customer.email }}\nAmount: {{ $json.body.data.amount / 100 }}\nReference: {{ $json.body.data.reference }}\nStatus: {{ $json.body.data.status }}",
+        "message": "=<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\" />\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"/>\n  <title>Payment Confirmation – AutomateIt</title>\n</head>\n<body style=\"margin:0;padding:0;background:#f4f4f8;font-family:Arial,sans-serif;\">\n  <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#f4f4f8;padding:40px 16px;\">\n    <tr>\n      <td align=\"center\">\n        <table width=\"560\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#ffffff;border-radius:6px;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,0.08);\">\n\n          <!-- Accent bar -->\n          <tr>\n            <td height=\"4\" style=\"background:linear-gradient(90deg,#00c97a,#00b8ff,#7c3aed);font-size:0;\">&nbsp;</td>\n          </tr>\n\n          <!-- Header -->\n          <tr>\n            <td align=\"center\" style=\"padding:40px 48px 32px;border-bottom:1px solid #f0f0f6;\">\n              <p style=\"font-size:16px;font-weight:800;color:#1a1a2e;margin:0 0 24px;\">● AutomateIt</p>\n              <span style=\"display:inline-block;background:#f0fdf8;border:1px solid #bbf7e0;border-radius:100px;padding:6px 16px;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:#00a863;\">● Payment Confirmed</span>\n              <h1 style=\"font-size:26px;font-weight:800;color:#1a1a2e;margin:20px 0 8px;\">Payment Successful</h1>\n              <p style=\"font-size:12px;color:#9090b0;margin:0;\">Hi {{ $json.body.data.customer.email }}, your payment has been received.</p>\n            </td>\n          </tr>\n\n          <!-- Amount block -->\n          <tr>\n            <td style=\"padding:32px 48px 0;\">\n              <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#f8f8fc;border:1px solid #ebebf5;border-left:4px solid #00c97a;border-radius:4px;\">\n                <tr>\n                  <td style=\"padding:20px 24px;\">\n                    <p style=\"font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#9090b0;margin:0 0 8px;\">Total Charged</p>\n                    <p style=\"font-size:32px;font-weight:800;color:#1a1a2e;margin:0;\">&#8358;&nbsp;{{ ($json.body.data.amount / 100).toLocaleString() }} <span style=\"font-size:13px;color:#00a863;font-weight:500;\">NGN</span></p>\n                  </td>\n                </tr>\n              </table>\n            </td>\n          </tr>\n\n          <!-- Details table -->\n          <tr>\n            <td style=\"padding:24px 48px;\">\n              <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"border:1px solid #ebebf5;border-radius:4px;border-collapse:collapse;\">\n\n                <tr style=\"border-bottom:1px solid #f4f4f8;\">\n                  <td width=\"40%\" style=\"padding:14px 20px;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#9090b0;\">Email</td>\n                  <td style=\"padding:14px 20px;font-size:12px;color:#3a3a5c;text-align:right;\">{{ $json.body.data.customer.email }}</td>\n                </tr>\n\n                <tr style=\"border-bottom:1px solid #f4f4f8;\">\n                  <td style=\"padding:14px 20px;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#9090b0;\">Amount</td>\n                  <td style=\"padding:14px 20px;font-size:12px;color:#3a3a5c;text-align:right;\">&#8358;&nbsp;{{ ($json.body.data.amount / 100).toLocaleString() }}</td>\n                </tr>\n\n                <tr style=\"border-bottom:1px solid #f4f4f8;\">\n                  <td style=\"padding:14px 20px;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#9090b0;\">Payment Method</td>\n                  <td style=\"padding:14px 20px;font-size:12px;color:#3a3a5c;text-align:right;\">{{ $json.body.data.channel }}</td>\n                </tr>\n\n                <tr style=\"border-bottom:1px solid #f4f4f8;\">\n                  <td style=\"padding:14px 20px;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#9090b0;\">Currency</td>\n                  <td style=\"padding:14px 20px;font-size:12px;color:#3a3a5c;text-align:right;\">{{ $json.body.data.currency }}</td>\n                </tr>\n\n                <tr style=\"border-bottom:1px solid #f4f4f8;\">\n                  <td style=\"padding:14px 20px;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#9090b0;\">Date & Time</td>\n                  <td style=\"padding:14px 20px;font-size:12px;color:#3a3a5c;text-align:right;\">{{ $json.body.data.paid_at }}</td>\n                </tr>\n\n                <tr style=\"border-bottom:1px solid #f4f4f8;\">\n                  <td style=\"padding:14px 20px;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#9090b0;\">Reference</td>\n                  <td style=\"padding:14px 20px;font-size:11px;color:#6060a0;text-align:right;font-family:'Courier New',monospace;\">{{ $json.body.data.reference }}</td>\n                </tr>\n\n                <tr>\n                  <td style=\"padding:14px 20px;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#9090b0;\">Status</td>\n                  <td style=\"padding:14px 20px;font-size:12px;color:#00a863;font-weight:600;text-align:right;\">{{ $json.body.data.status }}</td>\n                </tr>\n\n              </table>\n            </td>\n          </tr>\n\n          <!-- Message -->\n          <tr>\n            <td style=\"padding:0 48px 28px;\">\n              <p style=\"font-size:12px;line-height:1.9;color:#9090b0;margin:0;\">Keep this email as proof of payment. If you have any questions or need to make changes to your order, reach out to us directly and we will sort it out for you.</p>\n            </td>\n          </tr>\n\n          <!-- CTA -->\n          <tr>\n            <td style=\"padding:0 48px 36px;\">\n              <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#f8f8fc;border:1px solid #ebebf5;border-radius:4px;\">\n                <tr>\n                  <td style=\"padding:20px 24px;\">\n                    <p style=\"font-size:13px;font-weight:700;color:#3a3a5c;margin:0 0 4px;\">Need help or have questions?</p>\n                    <p style=\"font-size:12px;color:#9090b0;margin:0 0 16px;\">We typically respond within a few hours.</p>\n                    <a href=\"mailto:hello@automatesit.co\" style=\"display:inline-block;background:#1a1a2e;color:#ffffff;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;text-decoration:none;padding:10px 20px;border-radius:4px;\">Contact Us</a>\n                  </td>\n                </tr>\n              </table>\n            </td>\n          </tr>\n\n          <!-- Footer -->\n          <tr>\n            <td style=\"padding:20px 48px;border-top:1px solid #f0f0f6;background:#fafafa;\">\n              <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\">\n                <tr>\n                  <td style=\"font-size:11px;color:#c0c0d8;\">© 2026 AutomateIt</td>\n                  <td align=\"right\">\n                    <a href=\"#\" style=\"font-size:11px;color:#c0c0d8;text-decoration:none;margin-left:16px;\">automatesit.co</a>\n                    <a href=\"#\" style=\"font-size:11px;color:#c0c0d8;text-decoration:none;margin-left:16px;\">Privacy</a>\n                    <a href=\"#\" style=\"font-size:11px;color:#c0c0d8;text-decoration:none;margin-left:16px;\">Unsubscribe</a>\n                  </td>\n                </tr>\n              </table>\n            </td>\n          </tr>\n\n        </table>\n      </td>\n    </tr>\n  </table>\n</body>\n</html>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        48,
+        368
+      ],
+      "id": "3e64acfa-3238-4183-9d32-14d8ca119f53",
+      "name": " Send Payment Confirmation Email",
+      "webhookId": "66851515-dbe9-40c2-b417-b733759f27b1",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "kOiVf8CjHX96pCSj",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send Jeff's Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Payment System": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Chat Data": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Customer Message Trigger": {
+      "main": [
+        [
+          {
+            "node": "Prepare Chat Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Jeff – AI Sales Assistant": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Receive Payment Details": {
+      "main": [
+        [
+          {
+            "node": "Create Paystack Payment Link",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Paystack Payment Webhook": {
+      "main": [
+        [
+          {
+            "node": "Check Payment Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Payment Success": {
+      "main": [
+        [
+          {
+            "node": " Send Payment Confirmation Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "c2369e87-599e-482d-bae0-19da24d38757",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3680798a5f7b42c63876438bcb52a5d3d791429432cf9432476097d6cac1683d"
+  },
+  "id": "Kxhtzx53KtUlASYd",
+  "tags": []
+}
