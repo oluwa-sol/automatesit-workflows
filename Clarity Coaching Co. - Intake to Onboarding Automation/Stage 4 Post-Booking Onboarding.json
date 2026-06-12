@@ -1,0 +1,1005 @@
+{
+  "name": "Stage 4 Post-Booking Onboarding",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "bd5c146d-a2c5-41ac-a7cb-863b5150afb2",
+              "name": "Name",
+              "value": "={{ $json.body.payload.attendees[0].name }}",
+              "type": "string"
+            },
+            {
+              "id": "3084be86-fe88-4194-ab06-1ae57d8b6b3c",
+              "name": "Email",
+              "value": "={{ $json.body.payload.attendees[0].email }}",
+              "type": "string"
+            },
+            {
+              "id": "7b9ddc68-0f3e-41f3-af08-e4f768ba91d7",
+              "name": "Timezone",
+              "value": "={{ $json.body.payload.attendees[0].timeZone }}",
+              "type": "string"
+            },
+            {
+              "id": "4e2a9d94-6231-4eaf-87b4-c6c4d7003264",
+              "name": "Start_Time",
+              "value": "={{ $json.body.payload.startTime }}",
+              "type": "string"
+            },
+            {
+              "id": "4cb7c84c-733c-4b0f-81be-ed3911fb2ca1",
+              "name": "=End Time",
+              "value": "={{ $json.body.payload.endTime }}",
+              "type": "string"
+            },
+            {
+              "id": "d1a55456-956f-4604-abed-0a889f7861f4",
+              "name": "=Meeting_Link",
+              "value": "={{ $json.body.payload.videoCallData.url }}",
+              "type": "string"
+            },
+            {
+              "id": "c41935f6-7e4a-4af2-bcf0-e87849729f4d",
+              "name": "=Booking ID",
+              "value": "={{ $json.body.payload.bookingId }}",
+              "type": "string"
+            },
+            {
+              "id": "060f0a27-c935-47f7-ac96-e10d0b2105af",
+              "name": "= Event Type",
+              "value": "={{ $json.body.payload.type }}",
+              "type": "string"
+            },
+            {
+              "id": "095b37b1-ee09-4474-a05c-a090d8ea7423",
+              "name": "=Organizer Email",
+              "value": "={{ $json.body.payload.organizer.email }}",
+              "type": "string"
+            },
+            {
+              "id": "62e6a2f5-80dd-428a-b6e7-11f1a1474e90",
+              "name": "=Status",
+              "value": "={{ $json.body.payload.status }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "42abc722-4a0c-4eb8-89c2-2c2de5508626",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "7ff02cbc-3dbc-4d19-8ddb-c958f6c112ee",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "ba1209d7-52f8-4c62-9622-97a066559f8c",
+      "name": "Booking Trigger and Post-Booking",
+      "webhookId": "7ff02cbc-3dbc-4d19-8ddb-c958f6c112ee"
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "={{ $json.Name }}",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "18oK12W-Z6ouRLQFH8O3C9CeDSlcscGqN",
+          "mode": "list",
+          "cachedResultName": "Clients",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/18oK12W-Z6ouRLQFH8O3C9CeDSlcscGqN"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        416,
+        0
+      ],
+      "id": "d6ba2dee-b227-48f6-b00f-3f600dd18779",
+      "name": "Create folder",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "wZtJj5MC6QyzWhS5",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "Intake Documents",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "={{ $('Create folder').item.json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        624,
+        0
+      ],
+      "id": "0e12358b-8c5e-4ce8-be79-7f016e4cc7e1",
+      "name": "Subfolder 1 — Intake Documents",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "wZtJj5MC6QyzWhS5",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "Session Notes",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "={{ $('Create folder').item.json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        832,
+        0
+      ],
+      "id": "de812139-3128-48dc-b34d-e408921d5423",
+      "name": "Subfolder 2 — Session Notes",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "wZtJj5MC6QyzWhS5",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "Resources Shared",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "={{ $('Create folder').item.json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1040,
+        0
+      ],
+      "id": "df05d23c-f1f6-436b-9a03-fd1777ac3eba",
+      "name": "Subfolder 3 — Resources Shared",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "wZtJj5MC6QyzWhS5",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Edit Fields').item.json.Email }}",
+        "subject": "=Your coaching journey starts here, {{ $('Edit Fields').item.json.Name }}",
+        "emailType": "text",
+        "message": "=Hi {{ $('Edit Fields').item.json.Name }},\n\nYour discovery call is confirmed for {{ $('Edit Fields').item.json.Start_Time }}.\n\nHere is your meeting link: {{ $('Edit Fields').item.json.Meeting_Link }}\n\nBefore we meet, please take 5 minutes to complete your intake form so—we can make the most of our time together.\n\nhttps://form.typeform.com/to/TL9jbLHD\n\nThis helps me understand exactly where you are right now and what—you want to achieve, so your call is focused and valuable from the—first minute.\n\nLooking forward to speaking with you.\n\nWarm regards,\nSarah Okonkwo\nClarity Coaching Co.",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1344,
+        0
+      ],
+      "id": "59accb27-a9a7-4d79-ba6c-c8880a46e632",
+      "name": "Gmail - Send Intake Form to Client",
+      "webhookId": "f6909265-d5ac-4af9-ae46-c0689b28729d",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "1KJGxtdver2xgn6G",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "=damee221@gmail.com",
+        "subject": "={{ $('Edit Fields').item.json.Name }}",
+        "emailType": "text",
+        "message": "=Hi Sarah,\n\nA new discovery call has been booked.\n\nName: {{ $('Edit Fields').item.json.Name }}\nEmail: {{ $('Edit Fields').item.json.Email }}\nTime: {{ $('Edit Fields').item.json.Start_Time }}\nTimezone: {{ $('Edit Fields').item.json.Timezone }}\nMeeting Link: {{ $('Edit Fields').item.json.Meeting_Link }}\n\nTheir intake form has been sent. A client folder has been created in Google Drive with all subfolders ready.\n\nYou are all set.",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1600,
+        0
+      ],
+      "id": "bc55dfd4-295d-4f2e-bd01-62a631c5a043",
+      "name": "Gmail -- Notify",
+      "webhookId": "b4280773-a075-4264-a5a6-e7bec6fbe3e6",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "1KJGxtdver2xgn6G",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "team": "90121526677",
+        "space": "90126569636",
+        "folderless": true,
+        "list": "901216153243",
+        "name": "Send proposal",
+        "additionalFields": {
+          "dueDate": "={{ new Date(new Date($('Edit Fields').item.json.Start_Time).getTime() + 48 * 60 * 60 * 1000).toISOString() }}"
+        }
+      },
+      "type": "n8n-nodes-base.clickUp",
+      "typeVersion": 1,
+      "position": [
+        1136,
+        304
+      ],
+      "id": "f43938e4-8791-4e35-8f71-0c7e917d636b",
+      "name": "Send proposal",
+      "credentials": {
+        "clickUpOAuth2Api": {
+          "id": "u24qUXtRDDRLrl9s",
+          "name": "ClickUp account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "team": "90121526677",
+        "space": "90126569636",
+        "folderless": true,
+        "list": "901216153243",
+        "name": "=Send post-call follow-up",
+        "additionalFields": {
+          "dueDate": "={{ new Date(new Date($('Edit Fields').item.json.Start_Time).getTime() + 2 * 60 * 60 * 1000).toISOString() }}",
+          "dueDateTime": false
+        }
+      },
+      "type": "n8n-nodes-base.clickUp",
+      "typeVersion": 1,
+      "position": [
+        896,
+        304
+      ],
+      "id": "1eaaccac-1e75-4a42-9444-02bbeee4dae8",
+      "name": "Send post-call follow-up",
+      "credentials": {
+        "clickUpOAuth2Api": {
+          "id": "u24qUXtRDDRLrl9s",
+          "name": "ClickUp account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "team": "90121526677",
+        "space": "90126569636",
+        "folderless": true,
+        "list": "901216153243",
+        "name": "Send pre-call reminder",
+        "additionalFields": {
+          "dueDate": "={{ new Date(new Date($('Edit Fields').item.json.Start_Time).getTime() - 24 * 60 * 60 * 1000).toISOString() }}"
+        }
+      },
+      "type": "n8n-nodes-base.clickUp",
+      "typeVersion": 1,
+      "position": [
+        656,
+        304
+      ],
+      "id": "d3c6aa60-5409-455f-bfc6-202f94598889",
+      "name": "Send pre-call reminder",
+      "credentials": {
+        "clickUpOAuth2Api": {
+          "id": "u24qUXtRDDRLrl9s",
+          "name": "ClickUp account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "team": "90121526677",
+        "space": "90126569636",
+        "folderless": true,
+        "list": "=901216153243",
+        "name": "Review intake form before call",
+        "additionalFields": {
+          "dueDate": "={{ new Date(new Date($('Edit Fields').item.json.Start_Time).getTime() - 2 * 60 * 60 * 1000).toISOString() }}"
+        }
+      },
+      "type": "n8n-nodes-base.clickUp",
+      "typeVersion": 1,
+      "position": [
+        448,
+        304
+      ],
+      "id": "99d96c39-01d0-4c77-a671-6c5f1072e926",
+      "name": "Review intake form before call",
+      "credentials": {
+        "clickUpOAuth2Api": {
+          "id": "u24qUXtRDDRLrl9s",
+          "name": "ClickUp account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "team": "90121526677",
+        "space": "90126569636",
+        "folder": "=901216153243",
+        "list": "=901216153243",
+        "name": "={{ $('Edit Fields').item.json.Name }}",
+        "additionalFields": {
+          "content": "=Email: {{ $('Edit Fields').item.json.Email }} Call time: {{ $('Edit Fields').item.json.Start_Time }} Meeting link: {{ $('Edit Fields').item.json.Meeting_Link }}",
+          "dueDate": "={{ $('Edit Fields').item.json.Start_Time }}",
+          "priority": 3
+        }
+      },
+      "type": "n8n-nodes-base.clickUp",
+      "typeVersion": 1,
+      "position": [
+        256,
+        304
+      ],
+      "id": "e3294be5-5fee-4546-a743-1a5bbde2fec3",
+      "name": "Create Task",
+      "credentials": {
+        "clickUpOAuth2Api": {
+          "id": "u24qUXtRDDRLrl9s",
+          "name": "ClickUp account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appfq31fCvXPxfpWP",
+          "mode": "list",
+          "cachedResultName": "Coaching Leads",
+          "cachedResultUrl": "https://airtable.com/appfq31fCvXPxfpWP"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl5lBAQ81vvXMsZK",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://airtable.com/appfq31fCvXPxfpWP/tbl5lBAQ81vvXMsZK"
+        },
+        "filterByFormula": "={Email} = \"{{ $('Edit Fields').item.json.Email }}\"",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        1344,
+        304
+      ],
+      "id": "ad911364-9798-45ba-bbd2-e4642e43d575",
+      "name": "Search records",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "YXZJ51FExYdWlAhE",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Edit Fields').item.json.Email }}",
+        "subject": "Your discovery call is confirmed",
+        "emailType": "text",
+        "message": "=Hi {{ $('Edit Fields').item.json.Name }},\n\nJust confirming your discovery call is locked in.\n\nDate and time: {{ $('Edit Fields').item.json.Start_Time }}\nMeeting link: {{ $('Edit Fields').item.json.Meeting_Link }}\n\nYou will receive a short intake form shortly.\nPlease complete it before our call so we can hit the ground running.\n\nSee you soon,\nSarah\nClarity Coaching Co.",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1792,
+        304
+      ],
+      "id": "8987ca29-46c1-497b-acc7-a1ed045aeb68",
+      "name": "Booking Confirmation to Client",
+      "webhookId": "63da9825-bfe2-4b66-9ee9-b82bc771e01a",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "1KJGxtdver2xgn6G",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appfq31fCvXPxfpWP",
+          "mode": "list",
+          "cachedResultName": "Coaching Leads",
+          "cachedResultUrl": "https://airtable.com/appfq31fCvXPxfpWP"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl5lBAQ81vvXMsZK",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://airtable.com/appfq31fCvXPxfpWP/tbl5lBAQ81vvXMsZK"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Ready_To_Book": false,
+            "id": "={{ $('Search records').item.json.id }}",
+            "Status": "Booked",
+            "Call_Date": "={{ new Date($('Edit Fields').item.json.Start_Time).toISOString().split('T')[0] }}",
+            "Score": 0
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Country",
+              "displayName": "Country",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Timezone",
+              "displayName": "Timezone",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Package",
+              "displayName": "Package",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Ready_To_Book",
+              "displayName": "Ready_To_Book",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Score",
+              "displayName": "Score",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Tag",
+              "displayName": "Tag",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Reason",
+              "displayName": "Reason",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Awaiting Booking",
+                  "value": "Awaiting Booking"
+                },
+                {
+                  "name": "Booked",
+                  "value": "Booked"
+                },
+                {
+                  "name": "Nurture",
+                  "value": "Nurture"
+                },
+                {
+                  "name": "Intake Received",
+                  "value": "Intake Received"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Submitted_At",
+              "displayName": "Submitted_At",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Call_Date",
+              "displayName": "Call_Date",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Intake_Notes",
+              "displayName": "Intake_Notes",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Intake Received ",
+              "displayName": "Intake Received ",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [],
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        1536,
+        304
+      ],
+      "id": "9b7d2f0b-800f-4984-8629-61be8f9ea842",
+      "name": "Update Record",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "YXZJ51FExYdWlAhE",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "BOOKING TRIGGER\nCal.com fires this workflow the moment a discovery call is booked. Lead details are extracted and mapped for use downstream.",
+        "height": 256,
+        "width": 384,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -48,
+        -96
+      ],
+      "typeVersion": 1,
+      "id": "7aee43ad-2246-4211-8647-f19886b81966",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "CLIENT FOLDER SETUP\nClient folder created in Google Drive with 4 subfolders: Intake Documents, Session Notes, Resources Shared, Contracts",
+        "height": 288,
+        "width": 832,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        368,
+        -96
+      ],
+      "typeVersion": 1,
+      "id": "09e6b394-9d62-4a95-99ad-a958e10eb2f3",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "CLIENT COMMUNICATION\nIntake form sent to client. Coach notified with booking details and Confirmation email sent to client with meeting link.",
+        "height": 288,
+        "width": 544,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1232,
+        -96
+      ],
+      "typeVersion": 1,
+      "id": "970712a6-cb3e-40bc-b03e-8b52a7d71665",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "TASK MANAGEMENT\nMaster task created with 4 subtasks: Review intake (-2hrs), Pre-call reminder (-24hrs), Post-call follow-up (+2hrs), Send proposal (+48hrs)",
+        "height": 256,
+        "width": 1040,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        224,
+        224
+      ],
+      "typeVersion": 1,
+      "id": "722f1715-7159-4694-be74-d4bab96d08fd",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "CRM UPDATE\nAirtable record searched by email. Status updated to Booked. Call date recorded automatically.",
+        "height": 256,
+        "width": 400,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1312,
+        224
+      ],
+      "typeVersion": 1,
+      "id": "4f049f26-f8c1-400e-ab50-b0b8846cfe64",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "BOOKING CONFIRMATION\nClient receives confirmation email with meeting date, time and link immediately after booking.",
+        "height": 256,
+        "width": 368
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1728,
+        224
+      ],
+      "typeVersion": 1,
+      "id": "3f241489-e0d2-4fe7-a7c6-9366b94ada72",
+      "name": "Sticky Note5"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Booking Trigger and Post-Booking": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Create folder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create folder": {
+      "main": [
+        [
+          {
+            "node": "Subfolder 1 — Intake Documents",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Subfolder 1 — Intake Documents": {
+      "main": [
+        [
+          {
+            "node": "Subfolder 2 — Session Notes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Subfolder 2 — Session Notes": {
+      "main": [
+        [
+          {
+            "node": "Subfolder 3 — Resources Shared",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Subfolder 3 — Resources Shared": {
+      "main": [
+        [
+          {
+            "node": "Gmail - Send Intake Form to Client",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail - Send Intake Form to Client": {
+      "main": [
+        [
+          {
+            "node": "Gmail -- Notify",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail -- Notify": {
+      "main": [
+        [
+          {
+            "node": "Create Task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send post-call follow-up": {
+      "main": [
+        [
+          {
+            "node": "Send proposal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send pre-call reminder": {
+      "main": [
+        [
+          {
+            "node": "Send post-call follow-up",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Review intake form before call": {
+      "main": [
+        [
+          {
+            "node": "Send pre-call reminder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Task": {
+      "main": [
+        [
+          {
+            "node": "Review intake form before call",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send proposal": {
+      "main": [
+        [
+          {
+            "node": "Search records",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search records": {
+      "main": [
+        [
+          {
+            "node": "Update Record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Record": {
+      "main": [
+        [
+          {
+            "node": "Booking Confirmation to Client",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "yMfb3hSpUHutYErb",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "d496570f-ef9a-4c47-833f-f0ff124eeaa9",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9c853ab76e519f468592af3f0d580aaace661c238ec2ceb3aa41ea59a8c51a9b"
+  },
+  "id": "2bzgX5DOfRcd34ql",
+  "tags": []
+}

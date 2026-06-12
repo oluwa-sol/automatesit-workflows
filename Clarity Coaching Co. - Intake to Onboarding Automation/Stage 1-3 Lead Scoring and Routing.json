@@ -1,0 +1,772 @@
+{
+  "name": "Stage 1-3 Lead Scoring and Routing",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "58ef2cae-b26e-4fbd-8ee3-bb392ddbc884",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -384,
+        -128
+      ],
+      "id": "91585669-8b91-4d67-831a-605515f69a3d",
+      "name": "Typeform - Discovery Call Submission",
+      "webhookId": "58ef2cae-b26e-4fbd-8ee3-bb392ddbc884"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.Email }}",
+        "subject": "You are a great fit, here is how to book your call",
+        "emailType": "text",
+        "message": "=Hi {{ $json.Name }},  \n\nThank you for reaching out. Based on what you shared, I believe we would work really well together.\n\nI have reviewed your situation and I am confident we can make\nmeaningful progress on {{ $json.reason}}.\n\nBook your free discovery call here:\nhttps://cal.com/damilola-akinbobola-bu74js/15min\n\nI look forward to speaking with you.\n\nWarm regards,\nSarah\n",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        848,
+        -384
+      ],
+      "id": "9befd2bd-670d-44af-a313-079a102ef07a",
+      "name": "Gmail - Qualified Welcome",
+      "webhookId": "b786edc9-b123-41e2-941e-af358e396e52"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.Email }}",
+        "subject": "Let us find a time to talk",
+        "emailType": "text",
+        "message": "=Hi {{ $json.Name }},  \n\nThank you for getting in touch.\nI appreciate you sharing what you are working through.  \n\nI would love to learn more about your situation and explore whether we might be a good fit.  \n\nIf you would like to book a free discovery call, you can do so here: https://cal.com/damilola-akinbobola-bu74js/15min\n\nNo pressure at all. I look forward to connecting. \n\nWarm regards,\nSarah",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        800,
+        -128
+      ],
+      "id": "2e0acc01-030c-4405-809c-14ce70b97943",
+      "name": "Gmail - High Potential Welcome",
+      "webhookId": "e1a4b3e7-596f-400b-9ab4-896bb9ccaebd"
+    },
+    {
+      "parameters": {
+        "sendTo": "dami@automatesit.co",
+        "subject": "=High Potential Lead Needs Your Personal Touch: {{ $json.Name }}",
+        "emailType": "text",
+        "message": "=Hi Sarah,\n\nA new HIGH POTENTIAL lead just came in. They scored {{ $('Route by Lead Score').item.json.score }}/100.\n\nName: {{ $('Route by Lead Score').item.json.Name }}\nEmail: {{ $('Route by Lead Score').item.json.Email }}\nPackage: {{ $('Route by Lead Score').item.json.Package }}\nTimezone: {{ $('Route by Lead Score').item.json.Timezone }}\nCountry: {{ $('Route by Lead Score').item.json.Country }}\nReady to Book: {{ $('Route by Lead Score').item.json.Ready_To_Book }}\nAI Assessment: {{ $('Route by Lead Score').item.json.reason }}\n\n--- SUGGESTED PERSONAL OUTREACH ---\n\nHi {{ $('Route by Lead Score').item.json.Name }},\n\nI noticed your enquiry and wanted to reach out personally. \n\nWhat you shared really resonated with me. \nI would love to have a conversation.\n\n------------------------------------\n\nThey have already received the booking link. This is your cue to follow up personally within 2 hours.",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1056,
+        -128
+      ],
+      "id": "eaacb9de-e655-40a9-a5fe-596e76135a30",
+      "name": "Gmail - Notify Sarah (High Potential)",
+      "webhookId": "aef3d2d0-083d-4e81-b2ac-04b95b528089"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.Email }}",
+        "subject": " A few things that might help you right now ",
+        "emailType": "text",
+        "message": "=Hi {{ $json.Name }},\n\nThank you for reaching out. I appreciate you taking the time.\n\nBased on where you are right now, I want to make sure you have\naccess to some resources that can genuinely help:\n\n- Free Training: [YOUR TRAINING LINK]\n- Starter Guide: [YOUR PDF LINK]\n- Blog / Resources: [YOUR BLOG LINK]\n\nIf your situation changes or you would like to revisit working\ntogether in the future, my door is always open.\n\nWishing you the best,\nSarah\n",
+        "options": {
+          "appendAttribution": true
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        944,
+        160
+      ],
+      "id": "d4c808ce-cd1c-40d2-bf72-94d3adc0f357",
+      "name": "Gmail - Unqualified Resource Packet",
+      "webhookId": "cb48eb18-b720-48e9-9b58-4e695f0fee43"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appfq31fCvXPxfpWP",
+          "mode": "list",
+          "cachedResultName": "Coaching Leads",
+          "cachedResultUrl": "https://airtable.com/appfq31fCvXPxfpWP"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl5lBAQ81vvXMsZK",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://airtable.com/appfq31fCvXPxfpWP/tbl5lBAQ81vvXMsZK"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Ready_To_Book": true,
+            "Name": "={{ $('Route by Lead Score').item.json.Name }}",
+            "Email": "={{ $('Route by Lead Score').item.json.Email }}",
+            "Phone": "={{ $('Route by Lead Score').item.json.Phone }}\n\n",
+            "Status": "Awaiting Booking",
+            "Country": "={{ $('Route by Lead Score').item.json.Country }}",
+            "Timezone": "={{ $('Route by Lead Score').item.json.Timezone }}",
+            "Package": "={{ $('Route by Lead Score').item.json.Package }}",
+            "Score": "={{ $('Route by Lead Score').item.json.score }}",
+            "Reason": "={{ $('Route by Lead Score').item.json.reason }}",
+            "Submitted_At": "=2026-03-07T04:59:06",
+            "Tag": "={{ $('Route by Lead Score').item.json.tag }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Country",
+              "displayName": "Country",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Timezone",
+              "displayName": "Timezone",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Package",
+              "displayName": "Package",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Ready_To_Book",
+              "displayName": "Ready_To_Book",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Score",
+              "displayName": "Score",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Tag",
+              "displayName": "Tag",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Reason",
+              "displayName": "Reason",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Awaiting Booking",
+                  "value": "Awaiting Booking"
+                },
+                {
+                  "name": "Booked",
+                  "value": "Booked"
+                },
+                {
+                  "name": "Nurture",
+                  "value": "Nurture"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Submitted_At",
+              "displayName": "Submitted_At",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Call_Date",
+              "displayName": "Call_Date",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Intake_Notes",
+              "displayName": "Intake_Notes",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        1088,
+        -384
+      ],
+      "id": "ebbabd7b-6e66-4342-80f2-73257d3e739e",
+      "name": "Airtable - Create Lead Record (Qualified)"
+    },
+    {
+      "parameters": {
+        "jsCode": "const content = $input.first().json.content[0].text;\nconst clean = content.replace(/```json|```/g, \"\").trim();\nconst parsed = JSON.parse(clean);\n\nreturn [{\n  json: {\n    score: parsed.score,\n    tag: parsed.tag.trim(),\n    reason: parsed.reason,\n    Name: $('Map Typeform Data').item.json.Name,\n    Email: $('Map Typeform Data').item.json.Email,\n    Phone: $('Map Typeform Data').item.json.Phone,\n    Country: $('Map Typeform Data').item.json.Country,\n    Timezone: $('Map Typeform Data').item.json.Timezone,\n    Package: $('Map Typeform Data').item.json.Package,\n    Ready_To_Book: $('Map Typeform Data').item.json.Ready_To_Book,\n    Submitted_At: $('Map Typeform Data').item.json.Submitted_At\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        288,
+        -128
+      ],
+      "id": "4f39994c-9aa6-4d1b-987d-f513d1fae8fc",
+      "name": "Parse AI Response"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "sk"
+            },
+            {
+              "name": "anthropic-version",
+              "value": "2023-06-01"
+            },
+            {
+              "name": "content-type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "=json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "claude-haiku-4-5-20251001"
+            },
+            {
+              "name": "max_tokens",
+              "value": "={{ 1024 }}"
+            },
+            {
+              "name": "=messages",
+              "value": "={{ [{\"role\": \"user\", \"content\": \"You are a lead scoring assistant. Return ONLY valid JSON, nothing else.\\n\\nLead details:\\nName: \" + $json.Name + \"\\nPackage: \" + $json.Package + \"\\nReady to book: \" + $json.Ready_To_Book + \"\\nCountry: \" + $json.Country + \"\\n\\nFOLLOW THESE RULES EXACTLY IN ORDER:\\n\\n1. If Package contains 'tell me more' → score must be 10, tag must be UNQUALIFIED\\n2. If Ready_To_Book is 'No' → score must be 25, tag must be UNQUALIFIED\\n3. If Package contains 'Starter' AND Ready_To_Book is 'No' → score must be 15, tag must be UNQUALIFIED\\n4. If Package contains 'Starter' AND Ready_To_Book is 'Yes' → score is 55, tag is HIGH_POTENTIAL\\n5. If Package contains 'Growth' AND Ready_To_Book is 'Yes' → score is 65, tag is HIGH_POTENTIAL\\n6. If Package contains 'Premium' AND Ready_To_Book is 'Yes' → score is 85, tag is QUALIFIED\\n\\nDo not use your own judgment. Follow the rules above exactly.\\n\\nReturn exactly this format:\\n{\\\"score\\\": number, \\\"tag\\\": \\\"QUALIFIED or HIGH_POTENTIAL or UNQUALIFIED\\\", \\\"reason\\\": \\\"one sentence\\\"}\"}] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        64,
+        -128
+      ],
+      "id": "a3a146ec-4971-4d5d-b3ec-787d390e7c70",
+      "name": "Claude scores the Lead"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d377348f-d580-4ede-8021-46158eb9f3af",
+              "name": "=Name",
+              "value": "={{ $json.body.form_response.answers[0].text }}",
+              "type": "string"
+            },
+            {
+              "id": "69776124-9473-422d-942c-3bb2f8a44460",
+              "name": "=Email",
+              "value": "={{ $json.body.form_response.answers[1].email }}",
+              "type": "string"
+            },
+            {
+              "id": "7ed456d1-e39e-4a3e-98c8-faa35fbc7655",
+              "name": "=Phone",
+              "value": "={{ $json.body.form_response.answers[2].phone_number }}",
+              "type": "string"
+            },
+            {
+              "id": "7f5f0b12-f634-41a3-8441-d2e07e896121",
+              "name": "=Country",
+              "value": "={{ $json.body.form_response.answers[3].text }}",
+              "type": "string"
+            },
+            {
+              "id": "050fe144-2f8e-473a-a5c5-fe90236f6eed",
+              "name": "=Timezone",
+              "value": "={{ $json.body.form_response.answers[4].choice.label }}",
+              "type": "string"
+            },
+            {
+              "id": "56254bc2-4428-46db-be37-891b3368d464",
+              "name": "=Package",
+              "value": "={{ $json.body.form_response.answers[5].choice.label }}",
+              "type": "string"
+            },
+            {
+              "id": "a1966b7b-f680-4540-90e1-28d70d457455",
+              "name": "=Ready_To_Book",
+              "value": "={{ $json.body.form_response.answers[6].choice.label }}",
+              "type": "string"
+            },
+            {
+              "id": "6ec52e5d-06cf-42d1-ac53-a80e470df0fa",
+              "name": "=Submitted_At",
+              "value": "={{ $json.body.form_response.submitted_at }}",
+              "type": "string"
+            },
+            {
+              "id": "9b25ea79-c65f-426f-93f1-c3537bce7502",
+              "name": "=Form_ID",
+              "value": "={{ $json.body.form_response.form_id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -160,
+        -128
+      ],
+      "id": "38d5b486-a0a5-451e-b830-bfe7dad4c329",
+      "name": "Map Typeform Data"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.clickup.com/api/v2/list/901216153243/task",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization "
+            },
+            {
+              "name": " Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"name\": \"Qualified Lead - Follow up if no booking in 24hrs: {{ $json.name }}\",\n  \"description\": \"Lead scored {{ $json.score }}/100. Reason: {{ $json.reason }}. Email: {{ $json.email }}\",\n  \"priority\": 2,\n  \"due_date\": {{ $now.plus({hours: 24}).toMillis() }}\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1280,
+        -384
+      ],
+      "id": "8a60a5dc-b0e3-4323-a19a-61722b25c168",
+      "name": "ClickUp"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.tag }}",
+                    "rightValue": "QUALIFIED",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "f6722f86-e37b-4e3a-bbf2-c76abac9c7b9"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "d2dbf733-a415-43a3-89de-7dd30f39a8f3",
+                    "leftValue": "={{ $json.tag }}",
+                    "rightValue": "HIGH_POTENTIAL",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "d7404693-6aca-437a-9c16-a9a30ddbf10f",
+                    "leftValue": "={{ $json.tag }}",
+                    "rightValue": "UNQUALIFIED",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        512,
+        -144
+      ],
+      "id": "f2028c09-cd21-47c3-bc08-bd25c7f37017",
+      "name": "Route by Lead Score"
+    },
+    {
+      "parameters": {
+        "content": "STAGE 1 - LEAD CAPTURE\nTypeform discovery call form submission triggers this workflow via webhook \n\nSTAGE 2 - DATA MAPPING\nExtracts and cleans all lead fields from the raw Typeform payload",
+        "height": 320,
+        "width": 416,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -432,
+        -272
+      ],
+      "typeVersion": 1,
+      "id": "42484ed1-4cfe-4a8e-853c-e7beff717c15",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "AI SCORING\nClaude scores the lead 1-100 and assigns QUALIFIED, HIGH_POTENTIAL or UNQUALIFIED tag\n\nROUTING\nSwitch node routes lead to correct branch based on AI tag",
+        "height": 320,
+        "width": 656,
+        "color": "#681818"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        0,
+        -272
+      ],
+      "typeVersion": 1,
+      "id": "ec15153e-598e-4ac9-aa73-095ad149bf0b",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "QUALIFIED BRANCH\nEmail with booking link → Airtable record → ClickUp follow-up task",
+        "height": 240,
+        "width": 752,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        720,
+        -448
+      ],
+      "typeVersion": 1,
+      "id": "024a4d76-2910-422b-9c42-0271fa722a3b",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "HIGH POTENTIAL BRANCH\nEmail to lead + alert to Coach for personal outreach within 2hrs",
+        "height": 240,
+        "width": 544,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        720,
+        -192
+      ],
+      "typeVersion": 1,
+      "id": "8ba2c58f-80a8-4d52-94da-28abb9c5a20c",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "UNQUALIFIED BRANCH\nResource packet email sent\nLead tagged Nurture in Airtable",
+        "height": 240,
+        "width": 416,
+        "color": "#9A2396"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        720,
+        96
+      ],
+      "typeVersion": 1,
+      "id": "8652f1a6-e347-4412-afc7-64442d44ab98",
+      "name": "Sticky Note4"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Typeform - Discovery Call Submission": {
+      "main": [
+        [
+          {
+            "node": "Map Typeform Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail - Qualified Welcome": {
+      "main": [
+        [
+          {
+            "node": "Airtable - Create Lead Record (Qualified)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail - High Potential Welcome": {
+      "main": [
+        [
+          {
+            "node": "Gmail - Notify Sarah (High Potential)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Airtable - Create Lead Record (Qualified)": {
+      "main": [
+        [
+          {
+            "node": "ClickUp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse AI Response": {
+      "main": [
+        [
+          {
+            "node": "Route by Lead Score",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude scores the Lead": {
+      "main": [
+        [
+          {
+            "node": "Parse AI Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Map Typeform Data": {
+      "main": [
+        [
+          {
+            "node": "Claude scores the Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Lead Score": {
+      "main": [
+        [
+          {
+            "node": "Gmail - Qualified Welcome",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Gmail - High Potential Welcome",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Gmail - Unqualified Resource Packet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "oG0o3SzSDtBq63Lz",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "71470a4c-76a5-4d99-b72b-a50fd6c8c367",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "4894e6668c6b287c01226b0c31b352999bde257c00f16aaa5a3d211d1541e55a"
+  },
+  "id": "Zqe7aUkxYHdiTHeN",
+  "tags": []
+}
