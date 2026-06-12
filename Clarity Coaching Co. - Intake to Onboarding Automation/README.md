@@ -30,9 +30,9 @@ When the client submits their intake form, Airtable updates automatically and Sa
 * Gmail - Automated client communication
 
 ## THE RESULTS
-Response time: 19 hours → 60 seconds
-Admin time saved: 17.5 hours per week
-Manual steps eliminated: 8
-Workflows built: 3
-Nodes: 18
-Everything runs automatically while Sarah focuses on coaching
+* Response time: 19 hours → 60 seconds
+* Admin time saved: 17.5 hours per week
+* Manual steps eliminated: 8
+* Workflows built: 3
+* Nodes: 18
+* Everything runs automatically while Sarah focuses on coaching
