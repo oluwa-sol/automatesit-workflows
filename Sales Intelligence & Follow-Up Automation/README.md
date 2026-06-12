@@ -11,11 +11,11 @@ Sales teams and service businesses were losing leads due to slow response times 
 
 ## THE SOLUTION
 Built a fully automated 3-workflow AI sales intelligence system in n8n that analyses every DM and sales call without any human involvement.
-Workflow 1 - DM Analysis
+* Workflow 1 - DM Analysis
 Every DM from Instagram, Facebook and Slack is automatically analyzed by Claude AI. The system scores the lead 1-100, detects sentiment, intent, objections and buying signals, tags it HOT, WARM or COLD, and sends an instant alert with a personalized follow-up message.
-Workflow 2 - Sales Call Analysis
+* Workflow 2 - Sales Call Analysis
 The moment a call recording is ready in Fathom, Claude analyses the full transcript. It generates a call summary, extracts objections and buying signals, identifies next steps, scores the lead, and delivers a full coaching brief to the sales rep automatically.
-Workflow 3 - Daily Report
+* Workflow 3 - Daily Report
 Every morning at 8am a summary report is delivered covering all DMs analyzed, lead breakdown by tag, average scores, and call performance metrics from the previous day.
 
 ## TOOLS USED
