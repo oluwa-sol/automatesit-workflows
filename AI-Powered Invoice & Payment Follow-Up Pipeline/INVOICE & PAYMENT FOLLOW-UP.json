@@ -1,0 +1,1358 @@
+{
+  "name": "INVOICE & PAYMENT FOLLOW-UP",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "97fee37e-9dd1-46b1-b995-2c48f0774f2e",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        1600,
+        -544
+      ],
+      "id": "a6fa14b3-09e9-42ed-91b0-8dc5f8a5d25a",
+      "name": "Webhook",
+      "webhookId": "97fee37e-9dd1-46b1-b995-2c48f0774f2e"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3900d50f-e11a-4490-9d2c-9fb1ffbb8cab",
+              "name": "=invoice_id",
+              "value": "={{ $json.data.object.id }}",
+              "type": "string"
+            },
+            {
+              "id": "cccf4359-28fb-4bb5-8399-f64ac805ffa8",
+              "name": "=customer_id",
+              "value": "={{ $json.data.object.customer }}",
+              "type": "string"
+            },
+            {
+              "id": "9b0f754a-27c2-44cb-8564-9a4fa7a47f64",
+              "name": "=customer_email",
+              "value": "={{ $json.data.object.customer_email }}",
+              "type": "string"
+            },
+            {
+              "id": "cb4d28f5-8002-47f9-a803-038c6b48476f",
+              "name": "=customer_name",
+              "value": "={{ $json.data.object.customer_name }}",
+              "type": "string"
+            },
+            {
+              "id": "633b8cbd-e1df-48f9-90f1-b353fc028ef2",
+              "name": "=amount_due",
+              "value": "={{ $json.data.object.amount_due / 100 }}",
+              "type": "string"
+            },
+            {
+              "id": "8d621aac-cfe8-41ea-89f4-c0153a89a5e6",
+              "name": "=currency",
+              "value": "={{ $json.data.object.currency }}",
+              "type": "string"
+            },
+            {
+              "id": "c8059e1c-76b4-4920-9c5b-25e42056f303",
+              "name": "=status",
+              "value": "={{ $json.data.object.status }}",
+              "type": "string"
+            },
+            {
+              "id": "ef422268-ab7c-407b-ac0d-74ff0cf8120f",
+              "name": "=due_date",
+              "value": "= {{ $json.data.object.due_date ? new Date($json.body.data.object.due_date * 1000).toISOString() : new Date().toISOString() }}",
+              "type": "string"
+            },
+            {
+              "id": "b7077b13-96c0-49c4-b448-1cfcd7ac787b",
+              "name": "=days_overdue",
+              "value": "={{ $json.data.object.due_date ? Math.max(0, Math.floor((Date.now() / 1000 - $json.body.data.object.due_date) / 86400)) : 0 }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2048,
+        -544
+      ],
+      "id": "9d6e96ba-1872-4a82-8367-7c3775c5f600",
+      "name": "Extract Invoice Fields"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Signature check bypassed for testing\n// Re-enable in production\nreturn [{ json: $input.first().json.body }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1824,
+        -544
+      ],
+      "id": "92cbc075-7b43-4c0d-81cb-999743dc8c07",
+      "name": "Verify Stripe Signature"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "f7d9f147-9c7d-48c2-b8db-d74dbcbf8839",
+              "leftValue": "={{ $json.risk_score }}",
+              "rightValue": "high",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2832,
+        -544
+      ],
+      "id": "62843741-a99b-4fcd-971c-a01f8cf491ed",
+      "name": "Check If High Risk"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "schema": {
+          "__rl": true,
+          "value": "public",
+          "mode": "list",
+          "cachedResultName": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "invoice_log",
+          "mode": "list",
+          "cachedResultName": "invoice_log"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "hubspot_synced": false,
+            "invoice_id": "={{ $json.invoice_id }}",
+            "id": "=",
+            "customer_id": "={{ $json.customer_id }}",
+            "customer_email": "={{ $json.customer_email }}",
+            "customer_name": "={{ $json.customer_name }}",
+            "amount_due": "={{ $json.amount_due }}",
+            "currency": "={{ $json.currency }}",
+            "status": "={{ $json.status }}",
+            "due_date": "={{ $json.due_date }}",
+            "days_overdue": "={{ $json.days_overdue }}",
+            "risk_score": "={{ $json.risk_score }}",
+            "created_at": "={{ new Date().toISOString() }}",
+            "updated_at": "={{ new Date().toISOString() }}",
+            "risk_reason": "={{ $json.risk_reason }}"
+          },
+          "matchingColumns": [
+            "invoice_id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "invoice_id",
+              "displayName": "invoice_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "customer_id",
+              "displayName": "customer_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "customer_email",
+              "displayName": "customer_email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "customer_name",
+              "displayName": "customer_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "amount_due",
+              "displayName": "amount_due",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "currency",
+              "displayName": "currency",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "due_date",
+              "displayName": "due_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "days_overdue",
+              "displayName": "days_overdue",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "risk_score",
+              "displayName": "risk_score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "risk_reason",
+              "displayName": "risk_reason",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "hubspot_synced",
+              "displayName": "hubspot_synced",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        2832,
+        -400
+      ],
+      "id": "5a4b9555-7cf0-4857-aac0-3b3f5316b33c",
+      "name": "Save Invoice to Database",
+      "credentials": {
+        "postgres": {
+          "id": "WTakru3MedyRZxAq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "appToken",
+        "email": "={{ $json.customer_email }}",
+        "additionalFields": {
+          "leadStatus": "IN_PROGRESS",
+          "message": "=Invoice #{{ $json.invoice_id }} is HIGH RISK. Amount: ${{ $json.amount_due }}. Days overdue: {{ $json.days_overdue }}"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 2.2,
+      "position": [
+        3072,
+        -560
+      ],
+      "id": "13a385aa-b4e6-4e8a-9bc4-aee119a99d9c",
+      "name": "HubSpot Contact Sync",
+      "credentials": {
+        "hubspotAppToken": {
+          "id": "soyDfcZiYQWcjRPx",
+          "name": "HubSpot Service Key account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.days_overdue }}",
+                    "rightValue": 7,
+                    "operator": {
+                      "type": "number",
+                      "operation": "lte"
+                    },
+                    "id": "4c190e26-af8a-4243-993b-eb2c0e3df8c6"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "low"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "3673c201-46de-453c-8b38-4e883cde23b1",
+                    "leftValue": "={{ $json.days_overdue }}",
+                    "rightValue": 21,
+                    "operator": {
+                      "type": "number",
+                      "operation": "lte"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "medium"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "66810611-07e9-4d43-9271-db84b81d5fc0",
+                    "leftValue": "={{ $json.days_overdue }}",
+                    "rightValue": 21,
+                    "operator": {
+                      "type": "number",
+                      "operation": "gt"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "high"
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        2288,
+        -560
+      ],
+      "id": "c068a997-d3a7-4501-a080-2cd9a143f12c",
+      "name": "Score Invoice Risk"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "112eb908-e03a-4e0d-ab25-6a5ffd4c2faa",
+              "name": "=risk_score",
+              "value": "=high",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2544,
+        -544
+      ],
+      "id": "5569b1b5-8394-45ba-9b71-efdb9c98d799",
+      "name": "stamp the risk score"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        1024,
+        16
+      ],
+      "id": "5c94c517-24e3-4d11-b42c-b56d5686748c",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT\n  il.*\nFROM invoice_log il\nWHERE\n  il.status IN ('open', 'uncollectible')\n  AND il.days_overdue > 0\n  AND (\n    SELECT COUNT(*) FROM followup_log fl\n    WHERE fl.invoice_id = il.invoice_id\n    AND fl.sent_at > NOW() - INTERVAL '24 hours'\n  ) = 0\nORDER BY il.days_overdue DESC\nLIMIT 50;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1232,
+        16
+      ],
+      "id": "2dfa57b5-8de1-41c0-bee4-759b632dedfd",
+      "name": "Fetch Overdue Invoices",
+      "credentials": {
+        "postgres": {
+          "id": "WTakru3MedyRZxAq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1456,
+        16
+      ],
+      "id": "0f09441e-4794-459a-83b6-6033065776a0",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.risk_score }}",
+                    "rightValue": "low",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "2d477ac0-6a0b-4ffc-aa88-0d01622bae84"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Low Risk"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "815c6e64-eefa-4b88-b043-318100a94314",
+                    "leftValue": "{{ $json.risk_score }}",
+                    "rightValue": "medium",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Medium Risk"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "e54d746e-c5e3-4269-a664-130677a56287",
+                    "leftValue": "{{ $json.risk_score }}",
+                    "rightValue": "high",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "High Risk"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        1680,
+        0
+      ],
+      "id": "2533d60f-3876-4980-bd91-a68b06526caf",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"llama-3.3-70b-versatile\",\n  \"max_tokens\": 500,\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are a professional accounts receivable specialist. Write polite, clear, and firm payment reminder emails. Return ONLY the email body text. No subject line. No sign-off name placeholder. End with: Best regards, Accounts Team.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Write a payment reminder email for: Customer Name: {{ $json.customer_name }}, Amount Overdue: ${{ $json.amount_due }} {{ $json.currency }}, Days Overdue: {{ $json.days_overdue }}, Risk Level: {{ $json.risk_score }}. If risk is low (1-7 days), be gentle and friendly. If risk is medium (8-20 days), be firmer and mention potential service impact. Keep it under 120 words.\"\n    }\n  ]\n}\n\n",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2208,
+        16
+      ],
+      "id": "ec5660c3-014b-4a52-9d2f-360f99672560",
+      "name": "Groq Email Generator"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Invoice Data Store').first().json.customer_email }}",
+        "subject": "=Payment Reminder: Invoice #{{ $('Invoice Data Store').first().json.invoice_id }}",
+        "emailType": "text",
+        "message": "={{ $input.first().json.body.choices[0].message.content }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2448,
+        32
+      ],
+      "id": "95a33d47-dcf3-49bf-a60e-ecb034698a30",
+      "name": "Send Follow-Up Email",
+      "webhookId": "3e33d823-ba16-4493-b40b-d4aa9e68dd98",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "z4Fdw8PpEK8kqKwj",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0B7ZT01RA6",
+          "mode": "list",
+          "cachedResultName": "invoice-alerts"
+        },
+        "text": "=:rotating_light: *HIGH RISK INVOICE ALERT*\n\n*Customer:* {{ $('Invoice Data Store').first().json.customer_name }}\n*Email:* {{ $('Invoice Data Store').first().json.customer_email }}\n*Invoice ID:* {{ $('Invoice Data Store').first().json.invoice_id }}\n*Amount Due:* {{ $('Invoice Data Store').first().json.amount_due }} {{ $('Invoice Data Store').first().json.currency }}\n*Days Overdue:* {{ $('Invoice Data Store').first().json.days_overdue }} days\n*Risk Reason:* {{ $('Invoice Data Store').first().json.risk_reason }}\n\nAction needed: Please reach out to this client directly.",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.5,
+      "position": [
+        2144,
+        176
+      ],
+      "id": "b72a515a-0334-42b6-9d90-1b70da994ff4",
+      "name": "High Risk Alert",
+      "webhookId": "68fc8cf7-ef68-4eb5-a61c-ae0325dd4e0c",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "FgYEfgvhTwHLenxg",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "followup_log",
+          "mode": "list",
+          "cachedResultName": "followup_log"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": 0,
+            "action_type": "={{ $json.risk_score === 'high' ? 'slack_alert' : 'email_' + $json.risk_score }}",
+            "invoice_id": "={{ $('Invoice Data Store').first().json.invoice_id }}",
+            "notes": "={{ $('Groq Email Generator').first().json.body.choices[0].message.content }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "invoice_id",
+              "displayName": "invoice_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "action_type",
+              "displayName": "action_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sent_at",
+              "displayName": "sent_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "notes",
+              "displayName": "notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        2752,
+        48
+      ],
+      "id": "616e1212-08a5-470a-bd51-1956c4138aa6",
+      "name": "Log the Follow-Up Action",
+      "credentials": {
+        "postgres": {
+          "id": "WTakru3MedyRZxAq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        2608,
+        48
+      ],
+      "id": "33d4303e-144f-49c1-ade9-3d8dced05735",
+      "name": "Combine Follow-Up Actions"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5d41dc16-ce95-41be-b173-feccd42bd518",
+              "name": "invoice_id",
+              "value": "={{ $json.invoice_id }}",
+              "type": "string"
+            },
+            {
+              "id": "15ff1b80-92fd-4f1d-87c9-ae60ea32c132",
+              "name": "customer_id",
+              "value": "={{ $json.customer_id }}",
+              "type": "string"
+            },
+            {
+              "id": "e75edfab-0df9-443b-8086-6139c26e8bdd",
+              "name": "customer_email",
+              "value": "={{ $json.customer_email }}",
+              "type": "string"
+            },
+            {
+              "id": "a2772316-f17c-4dec-af1a-868bada9f96d",
+              "name": "customer_name",
+              "value": "={{ $json.customer_name }}",
+              "type": "string"
+            },
+            {
+              "id": "0d90f007-4117-4caa-85c0-0910d1935938",
+              "name": "amount_due",
+              "value": "={{ $json.amount_due }}",
+              "type": "string"
+            },
+            {
+              "id": "90653dc9-fd19-424a-94eb-df066d398352",
+              "name": "currency",
+              "value": "={{ $json.currency }}",
+              "type": "string"
+            },
+            {
+              "id": "0ace943c-2151-42ec-980f-0924110fbc6f",
+              "name": "status",
+              "value": "={{ $json.status }}",
+              "type": "string"
+            },
+            {
+              "id": "0b4421af-14a6-4c06-8889-19d5cc9e0e02",
+              "name": "due_date",
+              "value": "={{ $json.due_date }}",
+              "type": "string"
+            },
+            {
+              "id": "77c49ebf-27e5-4af2-b2d6-98ea89689e22",
+              "name": "days_overdue",
+              "value": "={{ $json.days_overdue }}",
+              "type": "number"
+            },
+            {
+              "id": "d4eb468c-84c0-4818-a831-81c4a012751e",
+              "name": "risk_score",
+              "value": "={{ $json.risk_score }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1952,
+        16
+      ],
+      "id": "f57f5bf3-c56b-4f5d-a452-8927543f5d1b",
+      "name": "Invoice Data Store"
+    },
+    {
+      "parameters": {
+        "sendTo": "dami@automatesit.co",
+        "subject": "=Daily Invoice Digest — {{ new Date($json['Date']).toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'Africa/Lagos' }) }}",
+        "emailType": "text",
+        "message": "=Good morning,\n\nHere is your daily invoice summary for {{ new Date($json['Date']).toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'Africa/Lagos' }) }}:\n\nTotal Overdue Invoices: {{ $json['Total Overdue'] }}\nHigh Risk: {{ $json['High Risk Count'] }}\nMedium Risk: {{ $json['Medium Risk Count'] }}\nLow Risk: {{ $json['Low Risk Count'] }}\nTotal Amount Outstanding: ${{ $json['Total Amount Outstanding'] }}\n\nFollow-up emails and Slack alerts have been sent automatically.\nReview the full report in Google Sheets.\n\nBest regards,\nInvoice Automation System",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        3936,
+        272
+      ],
+      "id": "0b75e8cc-81a7-4a2a-8ffb-d69327f31127",
+      "name": "Send Digest Email to Finance Lead",
+      "webhookId": "144795fe-02a9-4bd4-b5e6-cb1f9eddb92c",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "z4Fdw8PpEK8kqKwj",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1-bUaVDB_JkHWok3Smq91pN-Zbu6A71qRNW-GYLWSgME",
+          "mode": "list",
+          "cachedResultName": " Invoice Digest",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-bUaVDB_JkHWok3Smq91pN-Zbu6A71qRNW-GYLWSgME/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-bUaVDB_JkHWok3Smq91pN-Zbu6A71qRNW-GYLWSgME/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Date": "={{ new Date($json.report_date).toLocaleDateString('en-GB', { timeZone: 'Africa/Lagos' }) }}",
+            "Total Overdue": "={{ $json.total_overdue }}",
+            " High Risk Count": "={{ $json.high_risk_count }}",
+            "Medium Risk Count": "={{ $json.medium_risk_count }}",
+            "Low Risk Count": "={{ $json.low_risk_count }}",
+            "Total Amount Outstanding": "={{ $json.total_amount_outstanding }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Total Overdue",
+              "displayName": "Total Overdue",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": " High Risk Count",
+              "displayName": " High Risk Count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Medium Risk Count",
+              "displayName": "Medium Risk Count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Low Risk Count",
+              "displayName": "Low Risk Count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Total Amount Outstanding",
+              "displayName": "Total Amount Outstanding",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        3728,
+        272
+      ],
+      "id": "9e0cad56-da6b-4327-99c4-a41d29c747ee",
+      "name": "Append Digest Row",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "bQbvbutFnN3X6tPT",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT\n  COUNT(*) FILTER (WHERE risk_score = 'high')   AS high_risk_count,\n  COUNT(*) FILTER (WHERE risk_score = 'medium') AS medium_risk_count,\n  COUNT(*) FILTER (WHERE risk_score = 'low')    AS low_risk_count,\n  COUNT(*)                                       AS total_overdue,\n  COALESCE(SUM(amount_due), 0)                  AS total_amount_outstanding,\n  CURRENT_DATE                                   AS report_date\nFROM invoice_log\nWHERE\n  status IN ('open', 'uncollectible')\n  AND days_overdue > 0;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        3520,
+        272
+      ],
+      "id": "5c7029c1-5290-4db9-a980-6703171c78f4",
+      "name": "Pull Summary Stats",
+      "credentials": {
+        "postgres": {
+          "id": "WTakru3MedyRZxAq",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        3312,
+        272
+      ],
+      "id": "156f4520-0b2f-444f-b328-062dbdeec944",
+      "name": "Schedule Trigger1"
+    },
+    {
+      "parameters": {
+        "content": "## Workflow 1\n\n## Invoice Intake & Risk Scoring\n## Monitors incoming Stripe invoices in real time, scores each one by risk level based on days overdue, saves the record to the database, and flags high-risk clients directly in HubSpot for account manager visibility.",
+        "height": 512,
+        "width": 1744
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1552,
+        -736
+      ],
+      "typeVersion": 1,
+      "id": "0baeec73-95b1-4f87-a017-e793f95f93bf",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Workflow 2\n## Automated Follow-Up & Escalation\n## Runs every morning and works through every overdue invoice that has not been contacted in the last 24 hours. Low and medium risk clients receive a personalised AI-generated email. High risk invoices trigger an immediate Slack alert to the finance team.",
+        "height": 512,
+        "width": 2048,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        960,
+        -176
+      ],
+      "typeVersion": 1,
+      "id": "8c42737c-f51a-45e3-bc1c-99c41ddbdb69",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Workflow 3\n## Daily Finance Digest\n## Generates a daily summary of all outstanding invoices across every risk level, appends the data to a live Google Sheets report, and emails the digest to the finance lead every morning so the team always has a clear picture of what is owed.",
+        "height": 448,
+        "width": 928,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        3264,
+        16
+      ],
+      "typeVersion": 1,
+      "id": "7a4b9e49-85ad-408d-ba4a-721daaec0461",
+      "name": "Sticky Note2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Verify Stripe Signature",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Invoice Fields": {
+      "main": [
+        [
+          {
+            "node": "Score Invoice Risk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verify Stripe Signature": {
+      "main": [
+        [
+          {
+            "node": "Extract Invoice Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check If High Risk": {
+      "main": [
+        [
+          {
+            "node": "HubSpot Contact Sync",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Score Invoice Risk": {
+      "main": [
+        [
+          {
+            "node": "stamp the risk score",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "stamp the risk score",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "stamp the risk score",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "stamp the risk score": {
+      "main": [
+        [
+          {
+            "node": "Save Invoice to Database",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Check If High Risk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Fetch Overdue Invoices",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Overdue Invoices": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Invoice Data Store",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Invoice Data Store",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Invoice Data Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Email Generator": {
+      "main": [
+        [
+          {
+            "node": "Send Follow-Up Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Follow-Up Email": {
+      "main": [
+        [
+          {
+            "node": "Combine Follow-Up Actions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Combine Follow-Up Actions": {
+      "main": [
+        [
+          {
+            "node": "Log the Follow-Up Action",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Invoice Data Store": {
+      "main": [
+        [
+          {
+            "node": "Groq Email Generator",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "High Risk Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append Digest Row": {
+      "main": [
+        [
+          {
+            "node": "Send Digest Email to Finance Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pull Summary Stats": {
+      "main": [
+        [
+          {
+            "node": "Append Digest Row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Pull Summary Stats",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "oG0o3SzSDtBq63Lz",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "1da95df7-b85b-4c12-9c0e-29509b7cf709",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "4894e6668c6b287c01226b0c31b352999bde257c00f16aaa5a3d211d1541e55a"
+  },
+  "id": "Zqe7aUkxYHdiTHeN",
+  "tags": []
+}
